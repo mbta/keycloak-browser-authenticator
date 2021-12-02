@@ -6,9 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="robots" content="noindex, nofollow">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${msg("loginTitle",(realm.displayName!''))}</title>
-    <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
+	<meta name="viewport" content="width=device-width, initial-scale=1"> <title>${msg("loginTitle",(realm.displayName!''))}</title> <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
 	<link href="${url.resourcesPath}/css/stylesheet.css" rel="stylesheet" />
 </head>
 
@@ -18,19 +16,19 @@
 		<div class="container">
             
 	          <#-- App-initiated actions should not see warning messages about the need to complete the action -->
-	          <#-- during login.                                                                               -->
-	          <#if displayMessage && message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
-	              <div class="alert-${message.type} ${properties.kcAlertClass!} pf-m-<#if message.type = 'error'>danger<#else>${message.type}</#if>">
-	                  <div class="pf-c-alert__icon">
-	                      <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
-	                      <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
-	                      <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
-	                      <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
-	                  </div>
-	                      <span class="${properties.kcAlertTitleClass!}">${kcSanitize(message.summary)?no_esc}</span>
-	              </div>
-	          </#if>
-	
+	          <#-- during login.	                                                                          -->
+
+			<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
+				<div class="form-group">
+						<div class="form-error-container" role="alert">
+							<strong class="error-summary">Please correct the following issues:</strong>
+							<ul>
+								<li class="error-message">${kcSanitize(message.summary)?no_esc}</li>
+							</ul>
+						</div>
+				</div>	
+			</#if>
+
 			<#nested "form">
 	
 			<#if auth?has_content && auth.showTryAnotherWayLink() && showAnotherWayIfPresent>

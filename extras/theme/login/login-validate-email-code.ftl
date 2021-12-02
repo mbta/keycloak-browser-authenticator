@@ -8,8 +8,8 @@
     	<h1>${kcSanitize(msg("secondFactor.validateCodeTitle"))?no_esc}</h1>
         <form action="${url.loginAction}" method="post">
             <div class="form-group">
-               	<label for="form-input-code" class="form-input-label">${msg("secondFactor.code")}</label>
-				<input type="text" id="form-input-code" name="email_code" class="form-input" autofocus/>
+               	<label for="form-input-code" class="form-input-label<#if message?has_content && (message.type == 'error' || !isAppInitiatedAction??)> label-error</#if>">${msg("secondFactor.code")}</label>
+				<input type="text" id="form-input-code" name="email_code" class="form-input<#if message?has_content && (message.type == 'error' || !isAppInitiatedAction??)> input-error</#if>" autofocus/>
             </div>
 
             <div class="form-group submit-group">

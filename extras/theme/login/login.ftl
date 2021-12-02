@@ -9,17 +9,16 @@
 	        	
 	            <form onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
 	            	<div class="form-group">
-                        <label class="form-input-label" for="form-input-email"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
+                        <label class="form-input-label<#if messagesPerField.existsError('username')> label-error</#if>" for="form-input-email"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
                         <#if usernameEditDisabled??>
-	                        <input id="form-input-email" class="form-input" name="username" value="${(login.username!'')}" type="email" disabled />
+	                        <input id="form-input-email" class="form-input<#if messagesPerField.existsError('username')> input-error</#if>" name="username" value="${(login.username!'')}" type="email" disabled />
 	                    <#else>
-	                        <input id="form-input-email" class="form-input" name="username" value="${(login.username!'')}" type="email" autofocus autocomplete="off" />
+	                        <input id="form-input-email" class="form-input<#if messagesPerField.existsError('username')> input-error</#if>" name="username" value="${(login.username!'')}" type="email" autofocus autocomplete="off" />
 	                    </#if>
                     </div>
                     <div class="form-group">
-                        <label for="form-input-password" class="form-input-label">${msg("password")}</label>
-	
-	                    <input id="form-input-password" class="form-input" name="password" type="password" autocomplete="off" />
+                        <label for="form-input-password" class="form-input-label<#if messagesPerField.existsError('password')> label-error</#if>">${msg("password")}</label>
+                    	<input id="form-input-password" class="form-input<#if messagesPerField.existsError('password')> input-error</#if>" name="password" type="password" autocomplete="off" />
                     </div>
                     <div class="form-group submit-group">
                     	<#if realm.resetPasswordAllowed>

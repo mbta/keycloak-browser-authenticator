@@ -6,8 +6,8 @@
     	<h1>${msg("registerTitle")}</h1>
         <form action="${url.registrationAction}" method="post">
             <div class="form-group">
-                    <label for="firstName" class="form-input-label">${msg("firstName")}</label>
-                    <input type="text" id="firstName" class="form-input" name="firstName"
+                    <label for="firstName" class="form-input-label<#if messagesPerField.existsError('firstName')> label-error</#if>">${msg("firstName")}</label>
+                    <input type="text" id="firstName" class="form-input<#if messagesPerField.existsError('firstName')> input-error</#if>" name="firstName"
                            value="${(register.formData.firstName!'')}"
                            aria-invalid="<#if messagesPerField.existsError('firstName')>true</#if>"
                     />
@@ -20,8 +20,8 @@
             </div>
 
             <div class="form-group">
-                    <label for="lastName" class="form-input-label">${msg("lastName")}</label>
-                    <input type="text" id="lastName" class="form-input" name="lastName"
+                    <label for="lastName" class="form-input-label<#if messagesPerField.existsError('lastName')> label-error</#if>">${msg("lastName")}</label>
+                    <input type="text" id="lastName" class="form-input<#if messagesPerField.existsError('lastName')> input-error</#if>" name="lastName"
                            value="${(register.formData.lastName!'')}"
                            aria-invalid="<#if messagesPerField.existsError('lastName')>true</#if>"
                     />
@@ -34,8 +34,8 @@
             </div>
 
             <div class="form-group">
-                    <label for="email" class="form-input-label">${msg("email")}</label>
-                    <input type="text" id="email" class="form-input" name="email"
+                    <label for="email" class="form-input-label<#if messagesPerField.existsError('email')> label-error</#if>">${msg("email")}</label>
+                    <input type="text" id="email" class="form-input<#if messagesPerField.existsError('email')> input-error</#if>" name="email"
                            value="${(register.formData.email!'')}" autocomplete="email"
                            aria-invalid="<#if messagesPerField.existsError('email')>true</#if>"
                     />
@@ -49,8 +49,8 @@
 
             <#if !realm.registrationEmailAsUsername>
                 <div class="form-group">
-                        <label for="username" class="form-input-label">${msg("username")}</label>
-                        <input type="text" id="username" class="form-input" name="username"
+                        <label for="username" class="form-input-label<#if messagesPerField.existsError('username')> label-error</#if>">${msg("username")}</label>
+                        <input type="text" id="username" class="form-input<#if messagesPerField.existsError('username')> input-error</#if>" name="username"
                                value="${(register.formData.username!'')}" autocomplete="username"
                                aria-invalid="<#if messagesPerField.existsError('username')>true</#if>"
                         />
@@ -65,8 +65,8 @@
 
             <#if passwordRequired??>
                 <div class="form-group">
-                        <label for="password" class="form-input-label">${msg("password")}</label>
-                        <input type="password" id="password" class="form-input" name="password"
+                        <label for="password" class="form-input-label<#if messagesPerField.existsError('password')> label-error</#if>">${msg("password")}</label>
+                        <input type="password" id="password" class="form-input<#if messagesPerField.existsError('password')> input-error</#if>" name="password"
                                autocomplete="new-password"
                                aria-invalid="<#if messagesPerField.existsError('password','password-confirm')>true</#if>"
                         />
@@ -79,8 +79,8 @@
                 </div>
 
                 <div class="form-group">
-                        <label for="password-confirm" class="form-input-label">${msg("passwordConfirm")}</label>
-                        <input type="password" id="password-confirm" class="form-input"
+                        <label for="password-confirm" class="form-input-label<#if messagesPerField.existsError('password-confirm')> label-error</#if>">${msg("passwordConfirm")}</label>
+                        <input type="password" id="password-confirm" class="form-input<#if messagesPerField.existsError('password-confirm')> input-error</#if>"
                                name="password-confirm"
                                aria-invalid="<#if messagesPerField.existsError('password-confirm')>true</#if>"
                         />

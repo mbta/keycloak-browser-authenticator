@@ -6,8 +6,8 @@
     	<h1>${kcSanitize(msg("emailForgotTitle"))?no_esc}</h1>
         <form action="${url.loginAction}" method="post">
         	<div class="form-group">
-				<label for="form-input-email" class="form-input-label"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
-				<input type="email" id="form-input-email" name="username" class="form-input" value="${(auth.attemptedUsername!'')}" />
+				<label for="form-input-email" class="form-input-label<#if messagesPerField.existsError('username')> label-error</#if>"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
+				<input type="email" id="form-input-email" name="username" class="form-input<#if messagesPerField.existsError('username')> input-error</#if>" value="${(auth.attemptedUsername!'')}" />
 			</div>
 			<div class="form-group submit-group">
 				<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLogin"))?no_esc}</a>
