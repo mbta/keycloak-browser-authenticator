@@ -19,14 +19,46 @@
 	          <#-- during login.	                                                                          -->
 
 			<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
-				<div class="form-group">
-						<div class="form-error-container" role="alert">
-							<strong class="error-summary">Please correct the following issues:</strong>
+				<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
+					<div class="form-group">
+	                    <div class="form-message-container form-success" role="alert">
+	                        <strong class="form-message-summary">${msg('message.success')}</strong>
+	                        <ul>
+	                            <li class="form-message-text">${kcSanitize(message.summary)?no_esc}</li>
+	                        </ul>                    
+	                    </div>
+	                </div>
+				</#if>
+				<#if message.type = 'warning'>
+					<div class="form-group">
+	                    <div class="form-message-container form-warning" role="alert">
+	                        <strong class="form-message-summary">${msg('message.warning')}</strong>
+	                        <ul>
+	                            <li class="form-message-text">${kcSanitize(message.summary)?no_esc}</li>
+	                        </ul>
+	                    </div>
+	                </div>
+				</#if>
+				<#if message.type = 'error'>
+					<div class="form-group">
+						<div class="form-message-container form-error" role="alert">
+							<strong class="form-message-summary">${msg('message.error')}</strong>
 							<ul>
-								<li class="error-message">${kcSanitize(message.summary)?no_esc}</li>
+								<li class="form-message-text">${kcSanitize(message.summary)?no_esc}</li>
 							</ul>
 						</div>
-				</div>	
+					</div>
+				</#if>
+				<#if message.type = 'info'>
+					<div class="form-group">
+	                    <div class="form-message-container form-info" role="alert">
+	                        <strong class="form-message-summary">${msg('message.info')}</strong>
+	                        <ul>
+	                            <li class="form-message-text">${kcSanitize(message.summary)?no_esc}</li>
+	                        </ul>
+	                    </div>
+	                </div>
+				</#if>	
 			</#if>
 
 			<#nested "form">
