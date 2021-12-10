@@ -5,8 +5,8 @@
     <#elseif section = "header">
         ${msg("secondFactor.validateCode")}
     <#elseif section = "form">
-    	<h1>${kcSanitize(msg("secondFactor.validateCodeTitle"))?no_esc}</h1>
     	<div class="container">	
+    		<h1>${kcSanitize(msg("secondFactor.validateCodeTitle"))?no_esc}</h1>
     		<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
 				<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
 					<div class="form-group">

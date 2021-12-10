@@ -3,8 +3,8 @@
     <#if section = "header">
         ${msg("loginAccountTitle")}
     <#elseif section = "form">
-    	<h1>${msg("loginAccountTitle")}</h1>
-		<div class="container">
+    	<div class="container">
+			<h1>${msg("loginAccountTitle")}</h1>
 			<#if realm.password>
 	        	<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
 					<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
