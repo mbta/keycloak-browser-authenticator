@@ -4,7 +4,7 @@
   <artifactId>mbta-keycloak-browser-authenticator</artifactId>
   <version>1.0.0</version>
   <name>MBTA Keycloak Browser Authenticator</name>
-  <description>Keycloak SSO authenticator for Appen</description>
+  <description>Keycloak SSO authenticator for MBTA</description>
   
 	<properties>
 		<keycloak.version>15.0.2</keycloak.version>
