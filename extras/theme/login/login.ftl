@@ -71,8 +71,14 @@
 	                    <input name="login" id="sign-in" type="submit" value="${msg("doLogIn")}"/>
                     </div>
                     
-                    <#--if realm.password && social.providers??>
-			            <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
+                    <#if realm.password && realm.registrationAllowed && !registrationDisabled??>
+			            <div>
+							<span class="body-text">${msg("noAccount")}</span> <a href="${url.registrationUrl}">${msg("doRegister")}</a>
+			            </div>
+			        </#if>
+			        
+			        <#if realm.password && social.providers??>
+			            <div id="kc-social-providers" class="form-group">
 			                <hr/>
 			                <h4>${msg("identity-provider-login-label")}</h4>
 			
@@ -89,12 +95,6 @@
 			                        </a>
 			                    </#list>
 			                </ul>
-			            </div>
-			        </#if-->
-                    
-                    <#if realm.password && realm.registrationAllowed && !registrationDisabled??>
-			            <div>
-							<span class="body-text">${msg("noAccount")}</span> <a href="${url.registrationUrl}">${msg("doRegister")}</a>
 			            </div>
 			        </#if>
 	            </form>
