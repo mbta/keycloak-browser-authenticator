@@ -16,15 +16,6 @@
 		
 		<#nested "form">
 	
-		<#if auth?has_content && auth.showTryAnotherWayLink() && showAnotherWayIfPresent>
-			<form id="kc-select-try-another-way-form" action="${url.loginAction}" method="post">
-				<div class="form-group submit-group">
-					<input type="hidden" name="tryAnotherWay" value="on"/>
-					<a href="#" id="try-another-way" onclick="document.forms['kc-select-try-another-way-form'].submit();return false;" class="back-link">${msg("doTryAnotherWay")}</a>
-				</div>
-			</form>
-		</#if>
-	
 		<#if displayInfo>
 			<#nested "info">
 		</#if>

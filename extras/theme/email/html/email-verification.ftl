@@ -919,7 +919,7 @@ style="font-family: 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;">
 <span style="font-size:18px">
 <span style="font-family:helvetica neue,helvetica,arial,verdana,sans-serif">
 <br>
-${kcSanitize(msg("secondFactor.emailBodyHtml",code))?no_esc}
+${kcSanitize(msg("emailVerificationBodyHtml",link, linkExpiration, realmName, linkExpirationFormatter(linkExpiration)))?no_esc}
 </span>
 </span>
 </p>

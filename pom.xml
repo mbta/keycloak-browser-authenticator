@@ -2,12 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cz.integsoft.keycloak.browser</groupId>
   <artifactId>mbta-keycloak-browser-authenticator</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>MBTA Keycloak Browser Authenticator</name>
   <description>Keycloak SSO authenticator for MBTA</description>
   
 	<properties>
-		<keycloak.version>15.0.2</keycloak.version>
+		<keycloak.version>15.1.0</keycloak.version>
 		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
 		<infinispan.version>11.0.4.Final</infinispan.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -87,8 +87,8 @@
 				<version>3.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 			<plugin>
