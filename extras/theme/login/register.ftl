@@ -146,8 +146,8 @@
 	            </#if>
 	            
 	            <div class="form-group submit-group">
+					<input type="submit" value="${msg("doRegister")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
 					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLogin"))?no_esc}</a>
-					<input type="submit" value="${msg("doRegister")}" id="submit"/>
 				</div>
 	        </form>
 		</div>

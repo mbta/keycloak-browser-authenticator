@@ -1,12 +1,10 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayInfo=true; section>
-	<#if section = "title">
-        ${msg("secondFactor.validateCode")}
-    <#elseif section = "header">
-        ${msg("secondFactor.validateCode")}
-    <#elseif section = "form">
-    	<div class="container">	
-    		<h1>${kcSanitize(msg("secondFactor.validateCodeTitle"))?no_esc}</h1>
+	<#if section = "form">
+    	<div class="container">
+    		<span class="user-name-container">
+    			<h1>${kcSanitize(msg("secondFactor.validateCodeTitle"))?no_esc}</h1>
+    		</span>
     		<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
 				<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
 					<div class="form-group">
@@ -56,10 +54,7 @@
 	            </div>
 	
 	            <div class="form-group submit-group">
-	                <input type="submit" value="${msg("doSubmit")}" id="submit"/>
-	            </div>
-	            <div>
-	            	<span class="body-text">${msg("secondFactor.validateCode")}</span>
+	                <input type="submit" value="${msg("secondFactor.doSubmit")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
 	            </div>
 	        </form>
     	</div>    

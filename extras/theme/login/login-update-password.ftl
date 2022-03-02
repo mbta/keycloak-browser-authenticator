@@ -90,10 +90,10 @@
 	
 	            <div class="form-group submit-group">
 					<#if isAppInitiatedAction??>
-						<input type="submit" value="${msg("doSubmit")}" id="submit" />
+						<input type="submit" value="${msg("doSubmit")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" />
 						<button type="submit" name="cancel-aia" value="true" />${msg("doCancel")}</button>
 					<#else>
-						<input type="submit" value="${msg("doSubmit")}" id="submit" />
+						<input type="submit" value="${msg("doSubmit")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" />
 					</#if>
 	            </div>
 	        </form>

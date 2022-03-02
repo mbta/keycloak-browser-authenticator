@@ -54,13 +54,13 @@
 					<input type="email" id="form-input-email" name="username" class="form-input<#if messagesPerField.existsError('username')> input-error</#if>" value="${(auth.attemptedUsername!'')}" />
 				</div>
 				<div class="form-group submit-group">
+					<input type="submit" value="${msg("doSubmit")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
 					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLogin"))?no_esc}</a>
-					<input type="submit" value="${msg("doSubmit")}" id="submit"/>
-				</div>
-				<div>
-					<span class="body-text">${kcSanitize(msg("emailInstruction"))?no_esc}</span>
 				</div>
 	        </form>
+	        <div>
+				<p class="body-text">${kcSanitize(msg("emailInstruction"))?no_esc}</p>
+			</div>
 		</div>
     </#if>
 </@layout.registrationLayout>

@@ -68,7 +68,7 @@
 						</#if>
 						
 						<input type="hidden" id="id-hidden-input" name="credentialId" <#if auth.selectedCredential?has_content>value="${auth.selectedCredential}"</#if>/>
-	                    <input name="login" id="sign-in" type="submit" value="${msg("doLogIn")}"/>
+	                    <input name="login" id="sign-in" type="submit" value="${msg("doLogIn")}" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
                     </div>
                     
                     <div>
