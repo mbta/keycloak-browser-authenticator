@@ -1,21 +1,26 @@
 package cz.integsoft.keycloak.browser.authenticator;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
+import org.keycloak.common.util.Time;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.Constants;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
@@ -23,7 +28,10 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.services.Urls;
+import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.services.messages.Messages;
+import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileContext;
@@ -39,7 +47,6 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 	public static final String PROVIDER_ID = "mbta-registration-user-creation";
 
-	private static final String REGISTRATION_FORBIDDEN_USERNAME = "registration.forbidden.username";
 	private static final String REGISTRATION_FORBIDDEN_EMAIL = "registration.forbidden.email";
 	private static final String EMAIL_MBTA_DOMAIN = "@mbta.com";
 
@@ -77,11 +84,13 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		}
 
 		List<FormMessage> errors = new ArrayList<>();
-		if (username.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
-			errors.add(new FormMessage(UserModel.USERNAME, REGISTRATION_FORBIDDEN_USERNAME));
-		}
+		// if (username.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
+		// errors.add(new FormMessage(UserModel.USERNAME, REGISTRATION_FORBIDDEN_USERNAME, idpm != null ? loginUrl : ""));
+		// }
 		if (email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
-			errors.add(new FormMessage(UserModel.EMAIL, REGISTRATION_FORBIDDEN_EMAIL));
+			final IdentityProviderModel idpm = getFirstIdentityProvider(context);
+			final String loginUrl = Urls.identityProviderAuthnRequest(prepareBaseUriBuilder(context), idpm.getAlias(), context.getRealm().getName()).toString();
+			errors.add(new FormMessage(UserModel.EMAIL, REGISTRATION_FORBIDDEN_EMAIL, idpm != null ? loginUrl : ""));
 		}
 		if (!errors.isEmpty()) {
 			context.validationError(formData, errors);
@@ -105,6 +114,31 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			return;
 		}
 		context.success();
+	}
+
+	private URI prepareBaseUriBuilder(final ValidationContext context) {
+		final String requestURI = context.getUriInfo().getBaseUri().getPath();
+		final UriBuilder uriBuilder = UriBuilder.fromUri(requestURI);
+		uriBuilder.replaceQuery(null);
+		uriBuilder.queryParam(Constants.CLIENT_ID, context.getAuthenticationSession().getClient().getClientId());
+		uriBuilder.queryParam(Constants.TAB_ID, context.getAuthenticationSession().getTabId());
+
+		final ClientSessionCode accessCode = new ClientSessionCode(context.getSession(), context.getRealm(), context.getAuthenticationSession());
+		context.getAuthenticationSession().getParentSession().setTimestamp(Time.currentTime());
+		final String accessCodeString = accessCode.getOrGenerateCode();
+		uriBuilder.queryParam(LoginActionsService.SESSION_CODE, accessCodeString);
+
+		return uriBuilder.build();
+	}
+
+	/**
+	 * Find first identity provider.
+	 *
+	 * @param context {@link ValidationContext}
+	 * @return provider model or null
+	 */
+	private IdentityProviderModel getFirstIdentityProvider(final ValidationContext context) {
+		return context.getRealm().getIdentityProvidersStream().findFirst().orElse(null);
 	}
 
 	@Override
