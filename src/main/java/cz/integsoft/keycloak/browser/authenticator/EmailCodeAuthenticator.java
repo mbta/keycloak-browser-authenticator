@@ -47,6 +47,7 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 	private static final String EMAIL_SUBJECT = "secondFactor.emailSubject";
 	private static final String EMAIL_TEMPLATE = "second-factor-code.ftl";
 	private static final String FTL_CODE_NAME = "email_code";
+	private static final String SKIP_MFA_ATTR = "skip_mfa";
 
 	private static final int I_1000 = 1000;
 	private static final int I_9999 = 9999;
@@ -70,6 +71,12 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 		final UserModel user = context.getUser();
 		if (user == null) {
 			returnFailure(context, USER_NOT_FOUND);
+			return;
+		}
+
+		if (user.getFirstAttribute(SKIP_MFA_ATTR) != null && user.getFirstAttribute(SKIP_MFA_ATTR).equals("true")) {
+			log.debugf("User %s - skip MFA = true", user.getUsername());
+			context.success();
 			return;
 		}
 
