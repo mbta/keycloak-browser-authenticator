@@ -428,4 +428,6 @@ a:visited {
 .fa-share-square {
     margin: 1rem;
 }
-
+.hidden {
+    display: none !important;
+}

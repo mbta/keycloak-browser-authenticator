@@ -1,6 +1,7 @@
 package cz.integsoft.keycloak.browser.authenticator;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -88,9 +89,15 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		}
 
 		List<FormMessage> errors = new ArrayList<>();
-		// if (username.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
-		// errors.add(new FormMessage(UserModel.USERNAME, REGISTRATION_FORBIDDEN_USERNAME, idpm != null ? loginUrl : ""));
-		// }
+		final String token = formData.getFirst("token");
+		final String robot = formData.getFirst("robot");
+
+		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
+			errors.add(new FormMessage(null, "login.error.robot"));
+			context.validationError(formData, errors);
+			return;
+		}
+
 		if (email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
 			final IdentityProviderModel idpm = getFirstIdentityProvider(context);
 			final String loginUrl = Urls.identityProviderAuthnRequest(prepareBaseUriBuilder(context), idpm.getAlias(), context.getRealm().getName()).toString();

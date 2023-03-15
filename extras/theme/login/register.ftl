@@ -56,7 +56,7 @@
 				</#if>	
 			</#if>
 			
-	        <form action="${url.registrationAction}" method="post">
+	        <form id="register-form" action="${url.registrationAction}" method="post">
 	            <div class="form-group">
 	                    <label for="firstName" class="form-input-label<#if messagesPerField.existsError('firstName')> label-error</#if>">${msg("firstName")}</label>
 	                    <input type="text" id="firstName" class="form-input<#if messagesPerField.existsError('firstName')> input-error</#if>" name="firstName"
@@ -155,11 +155,21 @@
 	                </div>
 	            </#if>
 	            
+	            <div class="form-group hidden">
+	            	<input type="text" value="" class="form-input" name="token" id="token">
+	            </div>
+	            
+	            <div class="form-group hidden">
+	            	<input type="checkbox" class="form-input" name="robot" id="robot">
+	            </div>
+	            
 	            <div class="form-group submit-group">
 					<input type="submit" value="${msg("doRegister")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
 					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLogin"))?no_esc}</a>
 				</div>
 	        </form>
+	        
+	        <script src="${url.resourcesPath}/js/form-registration.js"></script>
 		</div>
     </#if>
 </@layout.registrationLayout>
