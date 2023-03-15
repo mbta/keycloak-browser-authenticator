@@ -4,10 +4,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
@@ -44,6 +46,8 @@ import org.keycloak.userprofile.ValidationException;
  * @author integsoft
  */
 public class RegistrationUserCreation implements FormAction, FormActionFactory {
+
+	private static Logger logger = Logger.getLogger(RegistrationUserCreation.class);
 
 	public static final String PROVIDER_ID = "mbta-registration-user-creation";
 
@@ -161,11 +165,17 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 		final KeycloakSession session = context.getSession();
 
+		final String uuid = UUID.randomUUID().toString();
+
+		formData.add("user.attributes.mbta_uuid", uuid);
+
 		final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
 		final UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION_USER_CREATION, formData);
 		final UserModel user = profile.create();
 
 		user.setEnabled(true);
+
+		logger.infof("Added uuid %s to user %s", uuid, user.getUsername());
 
 		context.setUser(user);
 

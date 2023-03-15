@@ -18,3 +18,5 @@
 cz.integsoft.keycloak.browser.authenticator.EmailCodeAuthenticatorFactory
 cz.integsoft.keycloak.browser.authenticator.ResetCredentialChooseUser
 cz.integsoft.keycloak.browser.authenticator.UsernamePasswordFormFactory
+cz.integsoft.keycloak.browser.authenticator.IdpCreateUserIfUniqueAuthenticatorFactory
+cz.integsoft.keycloak.browser.authenticator.IdpPostLoginAuthenticatorFactory

@@ -92,6 +92,14 @@
 	                           aria-invalid="<#if messagesPerField.existsError('email')>true</#if>"
 	                    />
 	            </div>
+	            
+	            <div class="form-group">
+	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")}</label>
+	                    <input type="text" id="user.attributes.phone" class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.phone"
+	                           value="${(register.formData['user.attributes.phone']!'')}" autocomplete="user.attributes.phone"
+	                           aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
+	                    />
+	            </div>
 	
 	            <#if !realm.registrationEmailAsUsername>
 	                <div class="form-group">

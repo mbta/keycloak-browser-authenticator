@@ -1,6 +1,7 @@
 package cz.integsoft.keycloak.browser.authenticator;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -27,6 +28,8 @@ import org.keycloak.services.validation.Validation;
  */
 public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
+	private static Logger logger = Logger.getLogger(UsernamePasswordForm.class);
+
 	private static final String EMAIL_MBTA_DOMAIN = "@mbta.com";
 
 	private static final String MBTA_LOGIN_FORBIDDEN = "login.forbidden";
@@ -48,6 +51,12 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
 		}
 		if (!validateForm(context, formData)) {
 			return;
+		}
+		// check existence of mbta_uuid
+		if (context.getUser() != null && context.getUser().getFirstAttribute("mbta_uuid") == null) {
+			final String uuid = UUID.randomUUID().toString();
+			context.getUser().setSingleAttribute("mbta_uuid", uuid);
+			logger.infof("Added uuid %s to user %s", uuid, context.getUser().getUsername());
 		}
 		context.success();
 	}

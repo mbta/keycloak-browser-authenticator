@@ -1,10 +1,10 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','email','firstName','lastName'); section>
+<@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','email','firstName','lastName','user.attributes.phone'); section>
     <#if section = "header">
         ${msg("loginProfileTitle")}
     <#elseif section = "form">
     	<div class="container">
-    		<h1>${msg("registerTitle")}</h1>
+    		<h1>${msg("loginProfileTitle")}</h1>
 			<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
 				<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
 					<div class="form-group">
@@ -111,6 +111,20 @@
 					<#if messagesPerField.existsError('lastName')>
 						<span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
 							${kcSanitize(messagesPerField.get('lastName'))?no_esc}
+						</span>
+					</#if>
+	            </div>
+	            
+	            <div class="form-group">
+	            	<label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")}</label>
+	                <input type="text" id="user.attributes.phone" name="user.attributes.phone" value="${(user.attributes.phone!'')}"
+						class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>
+						aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
+					/>
+	
+					<#if messagesPerField.existsError('user.attributes.phone')>
+						<span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+							${kcSanitize(messagesPerField.get('user.attributes.phone'))?no_esc}
 						</span>
 					</#if>
 	            </div>
