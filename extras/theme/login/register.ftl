@@ -1,5 +1,5 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayMessage=!messagesPerField.existsError('firstName','lastName','email','username','password','password-confirm'); section>
+<@layout.registrationLayout displayMessage=!messagesPerField.existsError('firstName','lastName','email','username','password','password-confirm','user.attributes.phone'); section>
     <#if section = "header">
         ${msg("registerTitle")}
     <#elseif section = "form">
@@ -91,6 +91,12 @@
 	                           value="${(register.formData.email!'')}" autocomplete="email"
 	                           aria-invalid="<#if messagesPerField.existsError('email')>true</#if>"
 	                    />
+	                    
+	                    <#if messagesPerField.existsError('email')>
+	                        <span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+	                            ${kcSanitize(messagesPerField.get('email'))?no_esc}
+	                        </span>
+	                    </#if>
 	            </div>
 	            
 	            <div class="form-group">
@@ -99,6 +105,12 @@
 	                           value="${(register.formData['user.attributes.phone']!'')}" autocomplete="user.attributes.phone"
 	                           aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
 	                    />
+	                    
+	                    <#if messagesPerField.existsError('user.attributes.phone')>
+	                        <span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+	                            ${kcSanitize(messagesPerField.get('user.attributes.phone'))?no_esc}
+	                        </span>
+	                    </#if>
 	            </div>
 	
 	            <#if !realm.registrationEmailAsUsername>

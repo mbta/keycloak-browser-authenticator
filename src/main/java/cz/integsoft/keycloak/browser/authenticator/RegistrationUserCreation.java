@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
@@ -54,6 +56,8 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 	private static final String REGISTRATION_FORBIDDEN_EMAIL = "registration.forbidden.email";
 	private static final String EMAIL_MBTA_DOMAIN = "@mbta.com";
+	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
+	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone";
 
 	@Override
 	public String getHelpText() {
@@ -78,8 +82,8 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		final String username = profile.getAttributes().getFirstValue(UserModel.USERNAME);
 		final String firstName = profile.getAttributes().getFirstValue(UserModel.FIRST_NAME);
 		final String lastName = profile.getAttributes().getFirstValue(UserModel.LAST_NAME);
-		context.getEvent().detail(Details.EMAIL, email);
 
+		context.getEvent().detail(Details.EMAIL, email);
 		context.getEvent().detail(Details.USERNAME, username);
 		context.getEvent().detail(Details.FIRST_NAME, firstName);
 		context.getEvent().detail(Details.LAST_NAME, lastName);
@@ -91,6 +95,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		List<FormMessage> errors = new ArrayList<>();
 		final String token = formData.getFirst("token");
 		final String robot = formData.getFirst("robot");
+		final String mobileNumber = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE);
 
 		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
 			errors.add(new FormMessage(null, "login.error.robot"));
@@ -98,11 +103,19 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			return;
 		}
 
-		if (email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
+		if (email != null && email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
 			final IdentityProviderModel idpm = getFirstIdentityProvider(context);
 			final String loginUrl = Urls.identityProviderAuthnRequest(prepareBaseUriBuilder(context), idpm.getAlias(), context.getRealm().getName()).toString();
 			errors.add(new FormMessage(UserModel.EMAIL, REGISTRATION_FORBIDDEN_EMAIL, idpm != null ? loginUrl : ""));
 		}
+		if (mobileNumber != null && !mobileNumber.isBlank()) {
+			final Pattern p = Pattern.compile("^\\+[1-9]\\d{1,14}$");
+			final Matcher m = p.matcher(mobileNumber);
+			if (!m.matches()) {
+				errors.add(new FormMessage(REGISTRATION_FORM_NAME_MOBILE_PHONE, REGISTRATION_BAD_MOBILE_FORMAT));
+			}
+		}
+
 		if (!errors.isEmpty()) {
 			context.validationError(formData, errors);
 			return;
@@ -123,6 +136,9 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 			context.validationError(formData, errors);
 			return;
+		}
+		if (mobileNumber != null && !mobileNumber.isBlank()) {
+			context.getEvent().detail("mobileNumber", mobileNumber);
 		}
 		context.success();
 	}

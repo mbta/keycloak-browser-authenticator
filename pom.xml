@@ -7,7 +7,7 @@
   <description>Keycloak SSO authenticator for MBTA</description>
   
 	<properties>
-		<keycloak.version>15.1.0</keycloak.version>
+		<keycloak.version>15.0.2</keycloak.version>
 		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
 		<infinispan.version>11.0.4.Final</infinispan.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,6 +63,12 @@
             <version>${infinispan.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>amazon-sqs-java-messaging-lib</artifactId>
+			<version>1.0.4</version>
+			<type>jar</type>
+		</dependency>
         <dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
