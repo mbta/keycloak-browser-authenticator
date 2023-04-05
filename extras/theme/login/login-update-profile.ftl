@@ -116,7 +116,7 @@
 	            </div>
 	            
 	            <div class="form-group">
-	            	<label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")}</label>
+	            	<label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")}  <span>${msg("user.attributes.phone.span")}</label>
 	                <input type="text" id="user.attributes.phone" name="user.attributes.phone" value="${(user.attributes.phone!'')}"
 						class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>
 						aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
