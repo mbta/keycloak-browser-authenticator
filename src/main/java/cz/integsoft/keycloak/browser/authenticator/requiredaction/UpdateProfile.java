@@ -42,8 +42,6 @@ import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnection;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,7 +63,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone";
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
-	private static final String QUEUE_NAME = "t-alerts-queue";
 
 	@Override
 	public InitiatedActionSupport initiatedActionSupport() {
@@ -84,8 +81,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	@SuppressWarnings("unchecked")
 	@Override
 	public void processAction(final RequiredActionContext context) {
-		logger.info("**** in UpdateProfile.processAction");
-
 		final EventBuilder event = context.getEvent();
 		event.event(EventType.UPDATE_PROFILE);
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
@@ -159,13 +154,20 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	 */
 	private void sendMessageToQueue(final ProfileUpdateEvent event) throws QueueException {
 		try {
+			String env = System.getenv("awsEnv");
+			logger.infof("System env %s", env);
+			if (env == null) {
+				env = System.getProperty("awsEnv");
+				logger.infof("System property %s", env);
+			}
+			final StringBuffer queueName = new StringBuffer("keycloak-");
+			queueName.append(env).append("-app-user-updates-t-alerts");
+
+			logger.infof("Queue name %s", queueName.toString());
+
 			final ObjectMapper mapper = new ObjectMapper();
 			// Create the connection factory based on the config
-			final String accessKey = "AKIATBDNC67ZPE5R7NUG";
-			final String secretKey = "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";
-
-			final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(),
-					AmazonSQSClientBuilder.standard().withRegion(Regions.US_EAST_2).withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))));
+			final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(), AmazonSQSClientBuilder.standard().withRegion(Regions.US_EAST_2));
 
 			// Create the connection
 			final SQSConnection connection = connectionFactory.createConnection();
@@ -173,7 +175,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			// Create the nontransacted session with AUTO_ACKNOWLEDGE mode
 			final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			// Create a queue identity and specify the queue name to the session
-			final Queue queue = session.createQueue(QUEUE_NAME);
+			final Queue queue = session.createQueue(queueName.toString());
 
 			// Create a producer for the 'MyQueue'
 			final MessageProducer producer = session.createProducer(queue);
