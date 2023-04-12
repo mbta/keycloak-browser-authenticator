@@ -133,7 +133,9 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			} else if (pve.hasError(Messages.USERNAME_EXISTS)) {
 				context.error(Errors.USERNAME_IN_USE);
 			}
-
+			if (context.getRealm().isRegistrationEmailAsUsername() && errors.stream().anyMatch(e -> e.getField().equalsIgnoreCase("username"))) {
+				errors.remove(errors.stream().filter(e -> e.getField().equalsIgnoreCase("username")).findFirst().get());
+			}
 			context.validationError(formData, errors);
 			return;
 		}

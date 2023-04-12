@@ -1,6 +1,7 @@
 package cz.integsoft.keycloak.browser.authenticator.requiredaction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cz.integsoft.keycloak.browser.authenticator.exception.QueueException;
 import cz.integsoft.keycloak.browser.authenticator.model.ProfileUpdateEvent;
+import cz.integsoft.keycloak.browser.authenticator.model.QueueConfig;
 
 /**
  * Update profile required action rewrite.
@@ -63,6 +65,8 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone";
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
+
+	private static Map<String, QueueConfig> queueEnvConfig;
 
 	@Override
 	public InitiatedActionSupport initiatedActionSupport() {
@@ -160,33 +164,43 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 				env = System.getProperty("awsEnv");
 				logger.infof("System property %s", env);
 			}
-			final StringBuffer queueName = new StringBuffer("keycloak-");
-			queueName.append(env).append("-app-user-updates-t-alerts");
 
-			logger.infof("Queue name %s", queueName.toString());
+			if (queueEnvConfig == null || queueEnvConfig.isEmpty() || queueEnvConfig.get(env) == null) {
+				logger.error("Queue configuration was not recognized by environment");
+				throw new QueueException("Queue configuration was not recognized by environment");
+			}
 
 			final ObjectMapper mapper = new ObjectMapper();
+			final QueueConfig queueConfig = queueEnvConfig.get(env);
+
 			// Create the connection factory based on the config
-			final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(), AmazonSQSClientBuilder.standard().withRegion(Regions.US_EAST_2));
+			final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(), AmazonSQSClientBuilder.standard().withRegion(queueConfig.getQueueRegion()));
 
 			// Create the connection
 			final SQSConnection connection = connectionFactory.createConnection();
 
 			// Create the nontransacted session with AUTO_ACKNOWLEDGE mode
 			final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			// Create a queue identity and specify the queue name to the session
-			final Queue queue = session.createQueue(queueName.toString());
 
-			// Create a producer for the 'MyQueue'
-			final MessageProducer producer = session.createProducer(queue);
+			for (final String queueAppName : queueConfig.getQueueAppNames()) {
+				final StringBuffer queueName = new StringBuffer("keycloak-");
+				queueName.append(env).append("-app-user-updates-").append(queueAppName);
 
-			// Create the text message
-			final TextMessage message = session.createTextMessage(mapper.writeValueAsString(event));
+				logger.infof("Queue name %s", queueName.toString());
 
-			// Send the message
-			producer.send(message);
-			logger.infof("JMS Message %s", message.getJMSMessageID());
+				// Create a queue identity and specify the queue name to the session
+				final Queue queue = session.createQueue(queueName.toString());
 
+				// Create a producer for the 'MyQueue'
+				final MessageProducer producer = session.createProducer(queue);
+
+				// Create the text message
+				final TextMessage message = session.createTextMessage(mapper.writeValueAsString(event));
+
+				// Send the message
+				producer.send(message);
+				logger.infof("SQS Queue %s, JMS Message %s", queueName, message.getJMSMessageID());
+			}
 		} catch (final JMSException | JsonProcessingException | SdkClientException e) {
 			logger.error("Queue problem catched ", e);
 			throw new QueueException(e);
@@ -232,7 +246,10 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 	@Override
 	public void init(final Config.Scope config) {
-
+		queueEnvConfig = new HashMap<>();
+		queueEnvConfig.put("integsoft-sandbox", new QueueConfig(Arrays.asList("t-alerts", "alerts", "alerts-copy"), Regions.US_EAST_2));
+		queueEnvConfig.put("dev", new QueueConfig(Arrays.asList("alerts-concierge-dev-green", "alerts-concierge-dev-blue"), Regions.US_EAST_1));
+		queueEnvConfig.put("prod", new QueueConfig(Arrays.asList("alerts-concierge-prod"), Regions.US_EAST_1));
 	}
 
 	@Override

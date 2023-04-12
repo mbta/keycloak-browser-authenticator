@@ -67,9 +67,11 @@
 		                />
 	
 	                    <#if messagesPerField.existsError('username')>
-							<span id="input-error-username" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-								${kcSanitize(messagesPerField.get('username'))?no_esc}
-							</span>
+							<div class="instructions-container">
+								<span id="input-error-username" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+									${kcSanitize(messagesPerField.get('username'))?no_esc}
+								</span>
+							</div>
 						</#if>
 	                </div>
 	            </#if>
@@ -81,9 +83,11 @@
 	                />
 	
 	                <#if messagesPerField.existsError('email')>
-	                	<span id="input-error-email" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-	                    	${kcSanitize(messagesPerField.get('email'))?no_esc}
-	                    </span>
+	                	<div class="instructions-container">
+		                	<span id="input-error-email" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+		                    	${kcSanitize(messagesPerField.get('email'))?no_esc}
+		                    </span>
+		                </div>
 	                </#if>
 	            </div>
 	
@@ -95,9 +99,11 @@
 	                />
 	
 	                <#if messagesPerField.existsError('firstName')>
-	                	<span id="input-error-firstname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-	                    	${kcSanitize(messagesPerField.get('firstName'))?no_esc}
-	                    </span>
+	                	<div class="instructions-container">
+		                	<span id="input-error-firstname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+		                    	${kcSanitize(messagesPerField.get('firstName'))?no_esc}
+		                    </span>
+		                </div>
 	                </#if>
 	            </div>
 	
@@ -109,23 +115,27 @@
 					/>
 	
 					<#if messagesPerField.existsError('lastName')>
-						<span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-							${kcSanitize(messagesPerField.get('lastName'))?no_esc}
-						</span>
+						<div class="instructions-container">
+							<span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+								${kcSanitize(messagesPerField.get('lastName'))?no_esc}
+							</span>
+						</div>
 					</#if>
 	            </div>
 	            
 	            <div class="form-group">
 	            	<label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")}  <span>${msg("user.attributes.phone.span")}</label>
-	                <input type="text" id="user.attributes.phone" name="user.attributes.phone" value="${(user.attributes.phone!'')}"
+	                <input type="tel" id="user.attributes.phone" name="user.attributes.phone" value="${(user.attributes.phone!'')}"
 						class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>
 						aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
 					/>
 	
 					<#if messagesPerField.existsError('user.attributes.phone')>
-						<span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-							${kcSanitize(messagesPerField.get('user.attributes.phone'))?no_esc}
-						</span>
+						<div class="instructions-container">
+							<span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+								${kcSanitize(messagesPerField.get('user.attributes.phone'))?no_esc}
+							</span>
+						</div>
 					</#if>
 	            </div>
 	
