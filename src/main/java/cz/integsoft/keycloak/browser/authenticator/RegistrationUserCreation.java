@@ -57,6 +57,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	private static final String REGISTRATION_FORBIDDEN_EMAIL = "registration.forbidden.email";
 	private static final String EMAIL_MBTA_DOMAIN = "@mbta.com";
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
+	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone";
 
 	@Override
@@ -72,6 +73,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	@Override
 	public void validate(final ValidationContext context) {
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+		trimPhone(formData);
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
 		final KeycloakSession session = context.getSession();
@@ -95,6 +97,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		List<FormMessage> errors = new ArrayList<>();
 		final String token = formData.getFirst("token");
 		final String robot = formData.getFirst("robot");
+		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
 		final String mobileNumber = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE);
 
 		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
@@ -110,7 +113,9 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		}
 		if (mobileNumber != null && !mobileNumber.isBlank()) {
 			final Pattern p = Pattern.compile("^\\+[1-9]\\d{1,14}$");
-			final Matcher m = p.matcher(mobileNumber);
+			final String mob = mobileAreaCode + mobileNumber;
+			logger.debugf("Validate mobile number %s", mob);
+			final Matcher m = p.matcher(mob);
 			if (!m.matches()) {
 				errors.add(new FormMessage(REGISTRATION_FORM_NAME_MOBILE_PHONE, REGISTRATION_BAD_MOBILE_FORMAT));
 			}
@@ -140,9 +145,15 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			return;
 		}
 		if (mobileNumber != null && !mobileNumber.isBlank()) {
-			context.getEvent().detail("mobileNumber", mobileNumber);
+			context.getEvent().detail("mobileNumber", mobileAreaCode + mobileNumber);
 		}
 		context.success();
+	}
+
+	private void trimPhone(final MultivaluedMap<String, String> formData) {
+		if (formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE) != null) {
+			formData.putSingle(REGISTRATION_FORM_NAME_MOBILE_PHONE, formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE).replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("-", "").replaceAll("[ ]", ""));
+		}
 	}
 
 	private URI prepareBaseUriBuilder(final ValidationContext context) {
@@ -178,6 +189,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	@Override
 	public void success(final FormContext context) {
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+		trimPhone(formData);
 
 		final String email = formData.getFirst(UserModel.EMAIL);
 		String username = formData.getFirst(UserModel.USERNAME);

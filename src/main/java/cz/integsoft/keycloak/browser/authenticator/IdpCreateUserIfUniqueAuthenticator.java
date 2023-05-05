@@ -30,6 +30,10 @@ public class IdpCreateUserIfUniqueAuthenticator extends org.keycloak.authenticat
 
 	private static Logger logger = Logger.getLogger(IdpCreateUserIfUniqueAuthenticator.class);
 
+	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
+	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
+	private static final String USER_ATTRIBUTE_PHONE_COMP_NAME = "phone_comp";
+
 	@Override
 	protected void authenticateImpl(final AuthenticationFlowContext context, final SerializedBrokeredIdentityContext serializedCtx, final BrokeredIdentityContext brokerContext) {
 
@@ -60,6 +64,12 @@ public class IdpCreateUserIfUniqueAuthenticator extends org.keycloak.authenticat
 			final String uuid = UUID.randomUUID().toString();
 			federatedUser.setSingleAttribute("mbta_uuid", uuid);
 			logger.infof("Added uuid %s to user %s", uuid, federatedUser.getUsername());
+
+			if (federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) != null && federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME) != null) {
+				final String phoneComp = federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) + federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);
+				federatedUser.setSingleAttribute(USER_ATTRIBUTE_PHONE_COMP_NAME, phoneComp);
+				logger.infof("Added phone_comp %s to user %s", phoneComp, federatedUser.getUsername());
+			}
 
 			for (final Map.Entry<String, List<String>> attr : serializedCtx.getAttributes().entrySet()) {
 				if (!UserModel.USERNAME.equalsIgnoreCase(attr.getKey())) {

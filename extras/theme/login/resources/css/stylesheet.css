@@ -435,3 +435,13 @@ a:visited {
 .hidden {
     display: none !important;
 }
+.input-group {
+	display: flex;
+	gap: 1em;
+}
+.form-select {
+	border: 1px solid #165c96;
+	border-radius: 4px;
+	padding: 12px;
+	font-size: 16px;
+}

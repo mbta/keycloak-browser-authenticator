@@ -20,6 +20,10 @@ public class IdpPostLoginAuthenticator implements Authenticator {
 
 	private static Logger logger = Logger.getLogger(IdpPostLoginAuthenticator.class);
 
+	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
+	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
+	private static final String USER_ATTRIBUTE_PHONE_COMP_NAME = "phone_comp";
+
 	@Override
 	public void authenticate(final AuthenticationFlowContext context) {
 		final UserModel user = context.getUser();
@@ -34,6 +38,12 @@ public class IdpPostLoginAuthenticator implements Authenticator {
 			final String uuid = UUID.randomUUID().toString();
 			user.setSingleAttribute("mbta_uuid", uuid);
 			logger.infof("Added uuid %s to user %s", uuid, user.getUsername());
+		}
+
+		if (user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) != null && user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME) != null) {
+			final String phoneComp = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) + user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);
+			user.setSingleAttribute(USER_ATTRIBUTE_PHONE_COMP_NAME, phoneComp);
+			logger.infof("Added phone_comp %s to user %s", phoneComp, user.getUsername());
 		}
 
 		context.success();

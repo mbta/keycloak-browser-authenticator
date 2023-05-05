@@ -63,7 +63,9 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 	private static final String REQUIRED_ACTION_NAME = "MBTA_UPDATE_PROFILE";
 	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
+	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone";
+	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
 
 	private static Map<String, QueueConfig> queueEnvConfig;
@@ -94,12 +96,14 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 		final String oldLastName = user.getLastName();
 		final String oldEmail = user.getEmail();
 		final String oldMobileNumber = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);
+		final String oldMobileAreaCode = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE);
 
 		final String mobileNumber = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE);
+		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
 
 		if (mobileNumber != null && !mobileNumber.isBlank()) {
 			final Pattern p = Pattern.compile("^\\+[1-9]\\d{1,14}$");
-			final Matcher m = p.matcher(mobileNumber);
+			final Matcher m = p.matcher(mobileAreaCode + mobileNumber);
 			if (!m.matches()) {
 				final List<FormMessage> errors = new ArrayList<>();
 				errors.add(new FormMessage(REGISTRATION_FORM_NAME_MOBILE_PHONE, REGISTRATION_BAD_MOBILE_FORMAT));
@@ -130,8 +134,9 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 				}
 			});
 
-			if (mobileNumber != null && !mobileNumber.isBlank() && (oldMobileNumber == null || oldMobileNumber.isBlank() || !oldMobileNumber.equals(mobileNumber))) {
-				updatedUserData.put(USER_ATTRIBUTE_PHONE_NAME, mobileNumber);
+			if (mobileNumber != null && !mobileNumber.isBlank()
+					&& (oldMobileNumber == null || oldMobileNumber.isBlank() || !oldMobileNumber.equals(mobileNumber) || oldMobileAreaCode == null || oldMobileAreaCode.isBlank() || !oldMobileAreaCode.equals(mobileAreaCode))) {
+				updatedUserData.put(USER_ATTRIBUTE_PHONE_NAME, mobileAreaCode + trimPhone(mobileNumber));
 			}
 
 			if (!updatedUserData.isEmpty()) {
@@ -148,6 +153,10 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			errors.add(new FormMessage(null, "registration.queue.error"));
 			context.challenge(createResponse(context, formData, errors));
 		}
+	}
+
+	private String trimPhone(final String phone) {
+		return phone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
 	}
 
 	/**

@@ -107,10 +107,15 @@
 	            
 	            <div class="form-group">
 	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")} <span>${msg("user.attributes.phone.span")}</span></label>
-	                    <input type="tel" id="user.attributes.phone" class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.phone"
-	                           value="${(register.formData['user.attributes.phone']!'')}" autocomplete="user.attributes.phone"
-	                           aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
-	                    />
+	                    <div class="input-group">
+		                    <select id="user.attributes.areacode" class="form-select<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.areacode">
+		                    	<option value="+1">+1 / US</option>
+		                    </select>
+		                    <input type="tel" id="user.attributes.phone" class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.phone"
+		                           value="${(register.formData['user.attributes.phone']!'')}" autocomplete="user.attributes.phone" placeholder="###-###-####"
+		                           aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
+		                    />
+		                </div>
 	                    
 	                    <#if messagesPerField.existsError('user.attributes.phone')>
 	                        <div class="instructions-container">
