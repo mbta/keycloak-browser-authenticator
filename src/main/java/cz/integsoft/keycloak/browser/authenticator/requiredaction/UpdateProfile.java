@@ -90,6 +90,11 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 		final EventBuilder event = context.getEvent();
 		event.event(EventType.UPDATE_PROFILE);
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+
+		if (formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE) != null) {
+			formData.putSingle(REGISTRATION_FORM_NAME_MOBILE_PHONE, formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE).replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("-", "").replaceAll("[ ]", ""));
+		}
+
 		final UserModel user = context.getUser();
 
 		final String oldFirstName = user.getFirstName();
@@ -136,7 +141,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 			if (mobileNumber != null && !mobileNumber.isBlank()
 					&& (oldMobileNumber == null || oldMobileNumber.isBlank() || !oldMobileNumber.equals(mobileNumber) || oldMobileAreaCode == null || oldMobileAreaCode.isBlank() || !oldMobileAreaCode.equals(mobileAreaCode))) {
-				updatedUserData.put(USER_ATTRIBUTE_PHONE_NAME, mobileAreaCode + trimPhone(mobileNumber));
+				updatedUserData.put(USER_ATTRIBUTE_PHONE_NAME, mobileAreaCode + mobileNumber);
 			}
 
 			if (!updatedUserData.isEmpty()) {
@@ -153,10 +158,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			errors.add(new FormMessage(null, "registration.queue.error"));
 			context.challenge(createResponse(context, formData, errors));
 		}
-	}
-
-	private String trimPhone(final String phone) {
-		return phone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "");
 	}
 
 	/**
