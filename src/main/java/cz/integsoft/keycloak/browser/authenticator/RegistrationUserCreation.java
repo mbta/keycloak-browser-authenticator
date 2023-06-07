@@ -112,7 +112,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			errors.add(new FormMessage(UserModel.EMAIL, REGISTRATION_FORBIDDEN_EMAIL, idpm != null ? loginUrl : ""));
 		}
 		if (mobileNumber != null && !mobileNumber.isBlank()) {
-			final Pattern p = Pattern.compile("^\\+[1-9]\\d{1,14}$");
+			final Pattern p = Pattern.compile("^\\+[1-9]\\d{10}$");
 			final String mob = mobileAreaCode + mobileNumber;
 			logger.debugf("Validate mobile number %s", mob);
 			final Matcher m = p.matcher(mob);

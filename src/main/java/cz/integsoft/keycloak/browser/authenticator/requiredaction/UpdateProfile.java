@@ -107,7 +107,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
 
 		if (mobileNumber != null && !mobileNumber.isBlank()) {
-			final Pattern p = Pattern.compile("^\\+[1-9]\\d{1,14}$");
+			final Pattern p = Pattern.compile("^\\+[1-9]\\d{10}$");
 			final Matcher m = p.matcher(mobileAreaCode + mobileNumber);
 			if (!m.matches()) {
 				final List<FormMessage> errors = new ArrayList<>();

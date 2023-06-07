@@ -3,7 +3,7 @@
     <#if section = "header">
         ${msg("loginProfileTitle")}
     <#elseif section = "form">
-    	<div class="container">
+    	<div class="container" role="main">
     		<h1>${msg("loginProfileTitle")}</h1>
 			<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
 				<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
@@ -126,8 +126,9 @@
 	            <div class="form-group">
 	            	<label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")}  <span>${msg("user.attributes.phone.span")}</label>
 	                <div class="input-group">
+	                	<label class="visually-hidden" for="user.attributes.areacode">${msg("countryCode")}</label>
 		                <select id="user.attributes.areacode" class="form-select<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.areacode">
-		                    	<option value="+1">+1 / US</option>
+		                    	<option value="+1">US / +1</option>
 		                </select>
 		                <input type="tel" id="user.attributes.phone" name="user.attributes.phone" value="${(user.attributes.phone!'')}"
 							class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if> placeholder="###-###-####"

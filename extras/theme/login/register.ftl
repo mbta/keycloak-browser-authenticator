@@ -3,7 +3,7 @@
     <#if section = "header">
         ${msg("registerTitle")}
     <#elseif section = "form">
-    	<div class="container">
+    	<div class="container" role="main">
     		<h1>${msg("registerTitle")}</h1>
 			<#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
 				<#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span>
@@ -108,8 +108,9 @@
 	            <div class="form-group">
 	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")} <span>${msg("user.attributes.phone.span")}</span></label>
 	                    <div class="input-group">
+	                    	<label class="visually-hidden" for="user.attributes.areacode">${msg("countryCode")}</label>
 		                    <select id="user.attributes.areacode" class="form-select<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.areacode">
-		                    	<option value="+1">+1 / US</option>
+		                    	<option value="+1">US / +1</option>
 		                    </select>
 		                    <input type="tel" id="user.attributes.phone" class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.phone"
 		                           value="${(register.formData['user.attributes.phone']!'')}" autocomplete="user.attributes.phone" placeholder="###-###-####"
@@ -157,6 +158,16 @@
 		                            <span id="input-error-password" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
 		                                ${kcSanitize(messagesPerField.get('password'))?no_esc}
 		                            </span>
+		                        </div>
+	                        <#else>
+	                        	<div class="instructions-container">
+		                            ${msg("password.info")}
+		                            <ul>
+		                            	<li>${msg("password.info.li1")}</li>
+		                            	<li>${msg("password.info.li2")}</li>
+		                            	<li>${msg("password.info.li3")}</li>
+		                            	<li>${msg("password.info.li4")}</li>
+		                            </ul>
 		                        </div>
 	                        </#if>
 	                </div>

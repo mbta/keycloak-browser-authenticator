@@ -3,7 +3,7 @@
     <#if section = "header">
         ${msg("updatePasswordTitle")}
     <#elseif section = "form">
-    	<div class="container">
+    	<div class="container" role="main">
     		<h1>${msg('emailSetPasswordTitle')}</h1>
     		<div class="form-group">
 	    		<div class="form-message-container form-info" role="alert">
