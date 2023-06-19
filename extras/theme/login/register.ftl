@@ -106,7 +106,7 @@
 	            </div>
 	            
 	            <div class="form-group">
-	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")} <span>${msg("user.attributes.phone.span")}</span></label>
+	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")} <span>${msg("user.attributes.phone.span")?no_esc}</span></label>
 	                    <div class="input-group">
 	                    	<label class="visually-hidden" for="user.attributes.areacode">${msg("countryCode")}</label>
 		                    <select id="user.attributes.areacode" class="form-select<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.areacode">
@@ -207,7 +207,7 @@
 	            
 	            <div class="form-group submit-group">
 					<input type="submit" value="${msg("doRegister")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
-					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLogin"))?no_esc}</a>
+					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLoginRegistration"))?no_esc}</a>
 				</div>
 	        </form>
 	        

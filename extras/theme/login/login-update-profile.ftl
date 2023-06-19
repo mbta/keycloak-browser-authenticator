@@ -79,7 +79,7 @@
 	                <label for="email" class="form-input-label<#if messagesPerField.existsError('email')> label-error</#if>">${msg("email")}</label>
 	                <input type="text" id="email" name="email" value="${(user.email!'')}"
 	                	class="form-input<#if messagesPerField.existsError('email')> input-error</#if>
-	                    aria-invalid="<#if messagesPerField.existsError('email')>true</#if>" <#if user.email?? && user.email?contains("@mbta.com")>readonly</#if>
+	                    aria-invalid="<#if messagesPerField.existsError('email')>true</#if>" <#if user.email?? && user.email?contains("@mbta.com")>readonly style="border-color: #999; color: #999;"</#if>
 	                />
 	
 	                <#if messagesPerField.existsError('email')>

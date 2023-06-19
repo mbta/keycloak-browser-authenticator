@@ -68,8 +68,8 @@
 					</#if>
 				</div>
 				<div class="form-group submit-group">
-					<input type="submit" value="${msg("doSubmit")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
-					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLogin"))?no_esc}</a>
+					<input type="submit" value="${msg("doSubmitEmail")}" id="submit" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"/>
+					<a href="${url.loginUrl}" class="back-link">${kcSanitize(msg("backToLoginResetPassword"))?no_esc}</a>
 				</div>
 	        </form>
 	        <div>
