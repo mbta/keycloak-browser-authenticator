@@ -30,7 +30,7 @@ public class IdpCreateUserIfUniqueAuthenticator extends org.keycloak.authenticat
 
 	private static Logger logger = Logger.getLogger(IdpCreateUserIfUniqueAuthenticator.class);
 
-	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
+	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone_number";
 	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
 	private static final String USER_ATTRIBUTE_PHONE_COMP_NAME = "phone_comp";
 

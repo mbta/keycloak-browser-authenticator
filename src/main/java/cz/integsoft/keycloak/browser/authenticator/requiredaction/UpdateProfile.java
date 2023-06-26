@@ -62,9 +62,9 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	private static Logger logger = Logger.getLogger(UpdateProfile.class);
 
 	private static final String REQUIRED_ACTION_NAME = "MBTA_UPDATE_PROFILE";
-	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
+	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone_number";
 	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
-	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone";
+	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
 

@@ -106,22 +106,22 @@
 	            </div>
 	            
 	            <div class="form-group">
-	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone')> label-error</#if>">${msg("user.attributes.phone")} <span>${msg("user.attributes.phone.span")?no_esc}</span></label>
+	                    <label for="user.attributes.phone" class="form-input-label<#if messagesPerField.existsError('user.attributes.phone_number')> label-error</#if>">${msg("user.attributes.phone")} <span>${msg("user.attributes.phone.span")?no_esc}</span></label>
 	                    <div class="input-group">
 	                    	<label class="visually-hidden" for="user.attributes.areacode">${msg("countryCode")}</label>
-		                    <select id="user.attributes.areacode" class="form-select<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.areacode">
+		                    <select id="user.attributes.areacode" class="form-select<#if messagesPerField.existsError('user.attributes.phone_number')> input-error</#if>" name="user.attributes.areacode">
 		                    	<option value="+1">US / +1</option>
 		                    </select>
-		                    <input type="tel" id="user.attributes.phone" class="form-input<#if messagesPerField.existsError('user.attributes.phone')> input-error</#if>" name="user.attributes.phone"
-		                           value="${(register.formData['user.attributes.phone']!'')}" autocomplete="user.attributes.phone" placeholder="###-###-####"
-		                           aria-invalid="<#if messagesPerField.existsError('user.attributes.phone')>true</#if>"
+		                    <input type="tel" id="user.attributes.phone" class="form-input<#if messagesPerField.existsError('user.attributes.phone_number')> input-error</#if>" name="user.attributes.phone_number"
+		                           value="${(register.formData['user.attributes.phone_number']!'')}" autocomplete="user.attributes.phone" placeholder="###-###-####"
+		                           aria-invalid="<#if messagesPerField.existsError('user.attributes.phone_number')>true</#if>"
 		                    />
 		                </div>
 	                    
-	                    <#if messagesPerField.existsError('user.attributes.phone')>
+	                    <#if messagesPerField.existsError('user.attributes.phone_number')>
 	                        <div class="instructions-container">
 		                        <span id="input-error-lastname" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-		                            ${kcSanitize(messagesPerField.get('user.attributes.phone'))?no_esc}
+		                            ${kcSanitize(messagesPerField.get('user.attributes.phone_number'))?no_esc}
 		                        </span>
 		                    </div>
 	                    </#if>

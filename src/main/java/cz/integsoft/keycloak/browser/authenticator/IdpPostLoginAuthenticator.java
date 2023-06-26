@@ -20,7 +20,7 @@ public class IdpPostLoginAuthenticator implements Authenticator {
 
 	private static Logger logger = Logger.getLogger(IdpPostLoginAuthenticator.class);
 
-	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone";
+	private static final String USER_ATTRIBUTE_PHONE_NAME = "phone_number";
 	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
 	private static final String USER_ATTRIBUTE_PHONE_COMP_NAME = "phone_comp";
 
