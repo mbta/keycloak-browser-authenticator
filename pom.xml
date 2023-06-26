@@ -2,12 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cz.integsoft.keycloak.browser</groupId>
   <artifactId>mbta-keycloak-browser-authenticator</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.9</version>
   <name>MBTA Keycloak Browser Authenticator</name>
   <description>Keycloak SSO authenticator for MBTA</description>
   
 	<properties>
-		<keycloak.version>15.1.0</keycloak.version>
+		<keycloak.version>15.0.2</keycloak.version>
 		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
 		<infinispan.version>11.0.4.Final</infinispan.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,6 +63,21 @@
             <version>${infinispan.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>amazon-sqs-java-messaging-lib</artifactId>
+			<version>1.0.8</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-sts</artifactId>
+		    <version>1.11.106</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-crypto</artifactId>
+		    <version>5.8.3</version>
+		</dependency>
         <dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>

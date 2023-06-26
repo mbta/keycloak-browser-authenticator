@@ -1,13 +1,18 @@
 package cz.integsoft.keycloak.browser.authenticator;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
@@ -45,10 +50,15 @@ import org.keycloak.userprofile.ValidationException;
  */
 public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
+	private static Logger logger = Logger.getLogger(RegistrationUserCreation.class);
+
 	public static final String PROVIDER_ID = "mbta-registration-user-creation";
 
 	private static final String REGISTRATION_FORBIDDEN_EMAIL = "registration.forbidden.email";
 	private static final String EMAIL_MBTA_DOMAIN = "@mbta.com";
+	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
+	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
+	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
 
 	@Override
 	public String getHelpText() {
@@ -63,6 +73,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	@Override
 	public void validate(final ValidationContext context) {
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+		trimPhone(formData);
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
 		final KeycloakSession session = context.getSession();
@@ -73,8 +84,8 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		final String username = profile.getAttributes().getFirstValue(UserModel.USERNAME);
 		final String firstName = profile.getAttributes().getFirstValue(UserModel.FIRST_NAME);
 		final String lastName = profile.getAttributes().getFirstValue(UserModel.LAST_NAME);
-		context.getEvent().detail(Details.EMAIL, email);
 
+		context.getEvent().detail(Details.EMAIL, email);
 		context.getEvent().detail(Details.USERNAME, username);
 		context.getEvent().detail(Details.FIRST_NAME, firstName);
 		context.getEvent().detail(Details.LAST_NAME, lastName);
@@ -84,14 +95,32 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		}
 
 		List<FormMessage> errors = new ArrayList<>();
-		// if (username.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
-		// errors.add(new FormMessage(UserModel.USERNAME, REGISTRATION_FORBIDDEN_USERNAME, idpm != null ? loginUrl : ""));
-		// }
-		if (email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
+		final String token = formData.getFirst("token");
+		final String robot = formData.getFirst("robot");
+		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
+		final String mobileNumber = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE);
+
+		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
+			errors.add(new FormMessage(null, "login.error.robot"));
+			context.validationError(formData, errors);
+			return;
+		}
+
+		if (email != null && email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
 			final IdentityProviderModel idpm = getFirstIdentityProvider(context);
 			final String loginUrl = Urls.identityProviderAuthnRequest(prepareBaseUriBuilder(context), idpm.getAlias(), context.getRealm().getName()).toString();
 			errors.add(new FormMessage(UserModel.EMAIL, REGISTRATION_FORBIDDEN_EMAIL, idpm != null ? loginUrl : ""));
 		}
+		if (mobileNumber != null && !mobileNumber.isBlank()) {
+			final Pattern p = Pattern.compile("^\\+[1-9]\\d{10}$");
+			final String mob = mobileAreaCode + mobileNumber;
+			logger.debugf("Validate mobile number %s", mob);
+			final Matcher m = p.matcher(mob);
+			if (!m.matches()) {
+				errors.add(new FormMessage(REGISTRATION_FORM_NAME_MOBILE_PHONE, REGISTRATION_BAD_MOBILE_FORMAT));
+			}
+		}
+
 		if (!errors.isEmpty()) {
 			context.validationError(formData, errors);
 			return;
@@ -109,11 +138,22 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			} else if (pve.hasError(Messages.USERNAME_EXISTS)) {
 				context.error(Errors.USERNAME_IN_USE);
 			}
-
+			if (context.getRealm().isRegistrationEmailAsUsername() && errors.stream().anyMatch(e -> e.getField().equalsIgnoreCase("username"))) {
+				errors.remove(errors.stream().filter(e -> e.getField().equalsIgnoreCase("username")).findFirst().get());
+			}
 			context.validationError(formData, errors);
 			return;
 		}
+		if (mobileNumber != null && !mobileNumber.isBlank()) {
+			context.getEvent().detail("mobileNumber", mobileAreaCode + mobileNumber);
+		}
 		context.success();
+	}
+
+	private void trimPhone(final MultivaluedMap<String, String> formData) {
+		if (formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE) != null) {
+			formData.putSingle(REGISTRATION_FORM_NAME_MOBILE_PHONE, formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE).replaceAll("\\(", "").replaceAll("\\)", "").replaceAll("-", "").replaceAll("[ ]", ""));
+		}
 	}
 
 	private URI prepareBaseUriBuilder(final ValidationContext context) {
@@ -149,6 +189,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	@Override
 	public void success(final FormContext context) {
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+		trimPhone(formData);
 
 		final String email = formData.getFirst(UserModel.EMAIL);
 		String username = formData.getFirst(UserModel.USERNAME);
@@ -161,11 +202,17 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 		final KeycloakSession session = context.getSession();
 
+		final String uuid = UUID.randomUUID().toString();
+
+		formData.add("user.attributes.mbta_uuid", uuid);
+
 		final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
 		final UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION_USER_CREATION, formData);
 		final UserModel user = profile.create();
 
 		user.setEnabled(true);
+
+		logger.infof("Added uuid %s to user %s", uuid, user.getUsername());
 
 		context.setUser(user);
 

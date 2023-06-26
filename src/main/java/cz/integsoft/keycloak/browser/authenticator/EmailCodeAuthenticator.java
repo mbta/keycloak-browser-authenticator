@@ -48,6 +48,7 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 	private static final String EMAIL_TEMPLATE = "second-factor-code.ftl";
 	private static final String FTL_CODE_NAME = "email_code";
 	private static final String SKIP_MFA_ATTR = "skip_mfa";
+	private static final String NUMBER_OF_LOGIN_ATTR = "number_of_login";
 
 	private static final int I_1000 = 1000;
 	private static final int I_9999 = 9999;
@@ -76,6 +77,18 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 
 		if (user.getFirstAttribute(SKIP_MFA_ATTR) != null && user.getFirstAttribute(SKIP_MFA_ATTR).equals("true")) {
 			log.debugf("User %s - skip MFA = true", user.getUsername());
+			context.success();
+			return;
+		}
+
+		if (user.getFirstAttribute(NUMBER_OF_LOGIN_ATTR) == null) {
+			user.setSingleAttribute(NUMBER_OF_LOGIN_ATTR, "1");
+			context.success();
+			return;
+		}
+		if (!user.getFirstAttribute(NUMBER_OF_LOGIN_ATTR).equals("9")) {
+			final int numberOflogin = Integer.parseInt(user.getFirstAttribute(NUMBER_OF_LOGIN_ATTR)) + 1;
+			user.setSingleAttribute(NUMBER_OF_LOGIN_ATTR, String.valueOf(numberOflogin));
 			context.success();
 			return;
 		}
@@ -212,6 +225,9 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 			return;
 		}
 		log.debugf("Verify second factor code - user email %s, code %s - correct", context.getUser().getEmail(), code);
+		if (context.getUser().getFirstAttribute(SKIP_MFA_ATTR) == null || !context.getUser().getFirstAttribute(SKIP_MFA_ATTR).equals("true")) {
+			context.getUser().removeAttribute(NUMBER_OF_LOGIN_ATTR);
+		}
 		context.success();
 	}
 
