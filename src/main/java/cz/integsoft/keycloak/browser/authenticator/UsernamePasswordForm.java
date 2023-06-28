@@ -79,8 +79,8 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
 		final UserModel user = getUser(context, inputData);
 		// if the user has a "password" attribute, validate it. Remove "password" from attributes if valid.
 		if (user != null) {
-			logger.debugf("Has user %s password configured: %s", user.getUsername(), context.getSession().userCredentialManager().isConfiguredFor(context.getRealm(), user, CredentialRepresentation.PASSWORD));
-			if (context.getSession().userCredentialManager().isConfiguredFor(context.getRealm(), user, CredentialRepresentation.PASSWORD)) {
+			logger.debugf("Has user %s password configured: %s", user.getUsername(), user.credentialManager().isConfiguredFor(CredentialRepresentation.PASSWORD));
+			if (user.credentialManager().isConfiguredFor(CredentialRepresentation.PASSWORD)) {
 				if (user.getFirstAttribute(CredentialRepresentation.PASSWORD) != null) {
 					user.removeAttribute(CredentialRepresentation.PASSWORD);
 				}
@@ -104,7 +104,7 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
 			// store the password in Keycloak
 			// we catch an exception if the password does not meet the password policy
 			try {
-				context.getSession().userCredentialManager().updateCredential(context.getRealm(), user, UserCredentialModel.password(password));
+				user.credentialManager().updateCredential(UserCredentialModel.password(password));
 				user.removeAttribute(CredentialRepresentation.PASSWORD);
 			} catch (final ModelException e) {
 				logger.infof("Password policy - unable to set password as Keycloak password of user %s.", user.getUsername());

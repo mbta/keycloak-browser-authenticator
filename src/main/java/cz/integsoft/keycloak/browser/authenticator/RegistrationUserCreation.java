@@ -56,7 +56,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 	private static final String REGISTRATION_FORBIDDEN_EMAIL = "registration.forbidden.email";
 	private static final String EMAIL_MBTA_DOMAIN = "@mbta.com";
-	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
+	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.phone_number";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
 

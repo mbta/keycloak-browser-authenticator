@@ -7,9 +7,9 @@
   <description>Keycloak SSO authenticator for MBTA</description>
   
 	<properties>
-		<keycloak.version>15.0.2</keycloak.version>
-		<jboss.logging.version>3.4.1.Final</jboss.logging.version>
-		<infinispan.version>11.0.4.Final</infinispan.version>
+		<keycloak.version>19.0.3</keycloak.version>
+		<jboss.logging.version>3.4.3.Final</jboss.logging.version>
+		<infinispan.version>13.0.10.Final</infinispan.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
