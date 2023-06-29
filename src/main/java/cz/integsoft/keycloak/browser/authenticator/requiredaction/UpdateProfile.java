@@ -18,14 +18,10 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
-import org.keycloak.OAuth2Constants;
-import org.keycloak.authentication.DisplayTypeRequiredActionFactory;
 import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
-import org.keycloak.authentication.requiredactions.ConsoleUpdateProfile;
-import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -51,13 +47,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.integsoft.keycloak.browser.authenticator.exception.QueueException;
 import cz.integsoft.keycloak.browser.authenticator.model.ProfileUpdateEvent;
 import cz.integsoft.keycloak.browser.authenticator.model.QueueConfig;
+import cz.integsoft.keycloak.browser.authenticator.userprofile.EventAuditingAttributeChangeListener;
 
 /**
  * Update profile required action rewrite.
  *
  * @author integsoft
  */
-public class UpdateProfile implements RequiredActionProvider, RequiredActionFactory, DisplayTypeRequiredActionFactory {
+public class UpdateProfile implements RequiredActionProvider, RequiredActionFactory {
 
 	private static Logger logger = Logger.getLogger(UpdateProfile.class);
 
@@ -66,7 +63,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	private static final String USER_ATTRIBUTE_PHONE_AREA_CODE = "phoneAreaCode";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
-	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.mobile";
+	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.phone_number";
 
 	private static Map<String, QueueConfig> queueEnvConfig;
 
@@ -97,9 +94,9 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 		final UserModel user = context.getUser();
 
-		final String oldFirstName = user.getFirstName();
-		final String oldLastName = user.getLastName();
-		final String oldEmail = user.getEmail();
+		user.getFirstName();
+		user.getLastName();
+		user.getEmail();
 		final String oldMobileNumber = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);
 		final String oldMobileAreaCode = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE);
 
@@ -124,20 +121,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			final Map<String, String> updatedUserData = new HashMap<>();
 
 			// backward compatibility with old account console where attributes are not removed if missing
-			profile.update(false, (attributeName, userModel) -> {
-				if (attributeName.equals(UserModel.FIRST_NAME)) {
-					event.detail(Details.PREVIOUS_FIRST_NAME, oldFirstName).detail(Details.UPDATED_FIRST_NAME, user.getFirstName());
-					updatedUserData.put(attributeName, user.getFirstName());
-				}
-				if (attributeName.equals(UserModel.LAST_NAME)) {
-					event.detail(Details.PREVIOUS_LAST_NAME, oldLastName).detail(Details.UPDATED_LAST_NAME, user.getLastName());
-					updatedUserData.put(attributeName, user.getLastName());
-				}
-				if (attributeName.equals(UserModel.EMAIL)) {
-					event.detail(Details.PREVIOUS_EMAIL, oldEmail).detail(Details.UPDATED_EMAIL, user.getEmail());
-					updatedUserData.put(attributeName, user.getEmail());
-				}
-			});
+			profile.update(false, new EventAuditingAttributeChangeListener(profile, event, updatedUserData));
 
 			if (mobileNumber != null && !mobileNumber.isBlank()
 					&& (oldMobileNumber == null || oldMobileNumber.isBlank() || !oldMobileNumber.equals(mobileNumber) || oldMobileAreaCode == null || oldMobileAreaCode.isBlank() || !oldMobileAreaCode.equals(mobileAreaCode))) {
@@ -243,15 +227,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	@Override
 	public RequiredActionProvider create(final KeycloakSession session) {
 		return this;
-	}
-
-	@Override
-	public RequiredActionProvider createDisplay(final KeycloakSession session, final String displayType) {
-		if (displayType == null)
-			return this;
-		if (!OAuth2Constants.DISPLAY_CONSOLE.equalsIgnoreCase(displayType))
-			return null;
-		return ConsoleUpdateProfile.SINGLETON;
 	}
 
 	@Override
