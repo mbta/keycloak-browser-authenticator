@@ -53,17 +53,16 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 	private static final int I_1000 = 1000;
 	private static final int I_9999 = 9999;
 
-	private final Cache<String, CachedCode> secondFactorCache;
+	private Cache<String, CachedCode> secondFactorCache;
 
 	private final FreeMarkerUtil freeMarker;
 
+	private Properties properties;
+
 	/**
 	 * Constructor.
-	 *
-	 * @param secondFactorCache cache
 	 */
-	public EmailCodeAuthenticator(final Cache<String, CachedCode> secondFactorCache) {
-		this.secondFactorCache = secondFactorCache;
+	public EmailCodeAuthenticator() {
 		this.freeMarker = new FreeMarkerUtil();
 	}
 
@@ -77,6 +76,12 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 
 		if (user.getFirstAttribute(SKIP_MFA_ATTR) != null && user.getFirstAttribute(SKIP_MFA_ATTR).equals("true")) {
 			log.debugf("User %s - skip MFA = true", user.getUsername());
+			context.success();
+			return;
+		}
+
+		if (properties.getProperty("skipMFA.clients") != null && context.getAuthenticationSession().getClient().getClientId().equalsIgnoreCase(properties.getProperty("skipMFA.clients"))) {
+			log.debugf("Client %s - skip MFA", context.getAuthenticationSession().getClient().getClientId());
 			context.success();
 			return;
 		}
@@ -260,5 +265,19 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 	@Override
 	public void close() {
 
+	}
+
+	/**
+	 * @param properties the properties to set
+	 */
+	public void setProperties(final Properties properties) {
+		this.properties = properties;
+	}
+
+	/**
+	 * @param secondFactorCache the secondFactorCache to set
+	 */
+	public final void setSecondFactorCache(final Cache<String, CachedCode> secondFactorCache) {
+		this.secondFactorCache = secondFactorCache;
 	}
 }
