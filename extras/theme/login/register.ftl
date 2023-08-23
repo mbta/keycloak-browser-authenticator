@@ -187,6 +187,23 @@
 		                        </div>
 	                        </#if>
 	                </div>
+	                
+	                <div class="form-group">
+						<div class="input-group">	
+	                        <input type="checkbox" id="terms_of_use" class="form-input-checkbox <#if messagesPerField.existsError('terms_of_use')> input-error</#if>"
+	                               name="terms_of_use"
+	                               aria-invalid="<#if messagesPerField.existsError('terms_of_use')>true</#if>"
+	                        />
+	                        <label for="terms_of_use" class="form-input-label-not-bold<#if messagesPerField.existsError('terms_of_use')> label-error</#if>">${kcSanitize(msg("termsOfUse"))?no_esc}</label>
+	                    </div>
+	                    <#if messagesPerField.existsError('terms_of_use')>
+	                        <div class="instructions-container">
+		                        <span id="input-error-terms-of-use" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+		                        	${kcSanitize(messagesPerField.get('terms_of_use'))?no_esc}
+		                    	</span>
+		                	</div>
+	                    </#if>
+	                </div>
 	            </#if>
 	
 	            <#if recaptchaRequired??>

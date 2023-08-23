@@ -145,9 +145,22 @@ h3 {
 	font-weight:300;
 	color: #525766;
 }
+.form-input-label-not-bold {
+    color: #1C1E23; 
+    display: block;
+    text-align: left;
+    margin-bottom: 0.375rem;
+}
 
 .form-input {
     width: 100%;
+    border: 1px solid #165c96;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.form-input-checkbox {
+    width: 10%;
     border: 1px solid #165c96;
     border-radius: 4px;
     padding: 12px;

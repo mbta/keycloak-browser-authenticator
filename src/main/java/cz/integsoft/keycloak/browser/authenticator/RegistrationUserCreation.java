@@ -59,6 +59,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.phone_number";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
+	private static final String REGISTRATION_FORM_TERMS_OF_USE = "terms_of_use";
 
 	@Override
 	public String getHelpText() {
@@ -99,11 +100,18 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		final String robot = formData.getFirst("robot");
 		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
 		final String mobileNumber = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE);
+		final String termsOfUse = formData.getFirst(REGISTRATION_FORM_TERMS_OF_USE);
 
 		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
 			errors.add(new FormMessage(null, "login.error.robot"));
 			context.validationError(formData, errors);
 			return;
+		}
+
+		logger.debugf("termsOfUse %s", termsOfUse);
+
+		if (termsOfUse == null || !termsOfUse.equals("on")) {
+			errors.add(new FormMessage(REGISTRATION_FORM_TERMS_OF_USE, "termsOfUseRequired"));
 		}
 
 		if (email != null && email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
