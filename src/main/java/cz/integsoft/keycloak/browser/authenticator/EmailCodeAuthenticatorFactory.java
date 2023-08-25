@@ -1,7 +1,9 @@
 package cz.integsoft.keycloak.browser.authenticator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.infinispan.Cache;
 import org.keycloak.Config;
@@ -25,10 +27,12 @@ public class EmailCodeAuthenticatorFactory implements AuthenticatorFactory {
 	public static final String PROVIDER_ID = "email-code-authenticator";
 	private static final String CODES_CACHE_NAME = "codes";
 
-	private static EmailCodeAuthenticator emailCodeAuthenticator;
+	private static EmailCodeAuthenticator emailCodeAuthenticator = new EmailCodeAuthenticator();
 	private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = { AuthenticationExecutionModel.Requirement.REQUIRED, AuthenticationExecutionModel.Requirement.DISABLED };
 
 	private Cache<String, CachedCode> secondFactorCodesCache;
+
+	private static final Properties PROP = new Properties();
 
 	@Override
 	public Authenticator create(final KeycloakSession session) {
@@ -37,13 +41,18 @@ public class EmailCodeAuthenticatorFactory implements AuthenticatorFactory {
 		if (secondFactorCodesCache == null) {
 			throw new RuntimeException("Can not found second factor cache");
 		}
-		emailCodeAuthenticator = new EmailCodeAuthenticator(secondFactorCodesCache);
+		emailCodeAuthenticator.setSecondFactorCache(secondFactorCodesCache);
 		return emailCodeAuthenticator;
 	}
 
 	@Override
 	public void init(final Config.Scope config) {
-
+		try {
+			PROP.load(this.getClass().getClassLoader().getResourceAsStream("META-INF/authenticator.properties"));
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		emailCodeAuthenticator.setProperties(PROP);
 	}
 
 	@Override
