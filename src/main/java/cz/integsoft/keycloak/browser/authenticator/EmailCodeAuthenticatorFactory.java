@@ -27,7 +27,6 @@ public class EmailCodeAuthenticatorFactory implements AuthenticatorFactory {
 	public static final String PROVIDER_ID = "email-code-authenticator";
 	private static final String CODES_CACHE_NAME = "codes";
 
-	private static EmailCodeAuthenticator emailCodeAuthenticator = new EmailCodeAuthenticator();
 	private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = { AuthenticationExecutionModel.Requirement.REQUIRED, AuthenticationExecutionModel.Requirement.DISABLED };
 
 	private Cache<String, CachedCode> secondFactorCodesCache;
@@ -36,23 +35,22 @@ public class EmailCodeAuthenticatorFactory implements AuthenticatorFactory {
 
 	@Override
 	public Authenticator create(final KeycloakSession session) {
-		final InfinispanConnectionProvider icp = session.getProvider(InfinispanConnectionProvider.class);
-		secondFactorCodesCache = icp.getCache(CODES_CACHE_NAME);
-		if (secondFactorCodesCache == null) {
-			throw new RuntimeException("Can not found second factor cache");
-		}
-		emailCodeAuthenticator.setSecondFactorCache(secondFactorCodesCache);
-		return emailCodeAuthenticator;
-	}
-
-	@Override
-	public void init(final Config.Scope config) {
 		try {
 			PROP.load(this.getClass().getClassLoader().getResourceAsStream("META-INF/authenticator.properties"));
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-		emailCodeAuthenticator.setProperties(PROP);
+
+		final InfinispanConnectionProvider icp = session.getProvider(InfinispanConnectionProvider.class);
+		secondFactorCodesCache = icp.getCache(CODES_CACHE_NAME);
+		if (secondFactorCodesCache == null) {
+			throw new RuntimeException("Can not found second factor cache");
+		}
+		return new EmailCodeAuthenticator(session, secondFactorCodesCache, PROP);
+	}
+
+	@Override
+	public void init(final Config.Scope config) {
 	}
 
 	@Override
