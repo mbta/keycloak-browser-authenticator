@@ -1,13 +1,13 @@
 package cz.integsoft.keycloak.browser.authenticator;
 
-import javax.ws.rs.core.Response;
-
 import org.keycloak.authentication.AbstractFormAuthenticator;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.events.Errors;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.messages.Messages;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * Abstract class for all authenticators containing utility methods for validation and error reporting.

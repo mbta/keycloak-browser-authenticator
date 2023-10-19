@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
 import org.infinispan.Cache;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -25,12 +22,14 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.theme.FreeMarkerException;
-import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.beans.MessageFormatterMethod;
+import org.keycloak.theme.freemarker.FreeMarkerProvider;
 
 import cz.integsoft.keycloak.browser.authenticator.model.EmailTemplate;
 import cz.integsoft.keycloak.browser.authenticator.model.cache.CachedCode;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Authenticator sending and checking the generated code sent by email.
@@ -53,17 +52,23 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 	private static final int I_1000 = 1000;
 	private static final int I_9999 = 9999;
 
-	private Cache<String, CachedCode> secondFactorCache;
+	private final Cache<String, CachedCode> secondFactorCache;
 
-	private final FreeMarkerUtil freeMarker;
+	private final FreeMarkerProvider freeMarker;
 
-	private Properties properties;
+	private final Properties properties;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param session {@link KeycloakSession}
+	 * @param secondFactorCache 2FA cache
+	 * @param properties authenticator properties
 	 */
-	public EmailCodeAuthenticator() {
-		this.freeMarker = new FreeMarkerUtil();
+	public EmailCodeAuthenticator(final KeycloakSession session, final Cache<String, CachedCode> secondFactorCache, final Properties properties) {
+		this.freeMarker = session.getProvider(FreeMarkerProvider.class);
+		this.secondFactorCache = secondFactorCache;
+		this.properties = properties;
 	}
 
 	@Override
@@ -265,19 +270,5 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 	@Override
 	public void close() {
 
-	}
-
-	/**
-	 * @param properties the properties to set
-	 */
-	public void setProperties(final Properties properties) {
-		this.properties = properties;
-	}
-
-	/**
-	 * @param secondFactorCache the secondFactorCache to set
-	 */
-	public final void setSecondFactorCache(final Cache<String, CachedCode> secondFactorCache) {
-		this.secondFactorCache = secondFactorCache;
 	}
 }

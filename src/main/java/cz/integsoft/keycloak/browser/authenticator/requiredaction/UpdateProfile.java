@@ -13,8 +13,6 @@ import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -48,6 +46,8 @@ import cz.integsoft.keycloak.browser.authenticator.exception.QueueException;
 import cz.integsoft.keycloak.browser.authenticator.model.ProfileUpdateEvent;
 import cz.integsoft.keycloak.browser.authenticator.model.QueueConfig;
 import cz.integsoft.keycloak.browser.authenticator.userprofile.EventAuditingAttributeChangeListener;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Update profile required action rewrite.
@@ -81,7 +81,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 		context.challenge(createResponse(context, null, null));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void processAction(final RequiredActionContext context) {
 		final EventBuilder event = context.getEvent();

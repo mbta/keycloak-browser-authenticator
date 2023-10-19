@@ -2,8 +2,6 @@ package cz.integsoft.keycloak.browser.authenticator;
 
 import java.util.List;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
@@ -24,6 +22,8 @@ import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileContext;
 import org.keycloak.userprofile.UserProfileProvider;
 import org.keycloak.userprofile.ValidationException;
+
+import jakarta.ws.rs.core.MultivaluedMap;
 
 /**
  * Registration profile.

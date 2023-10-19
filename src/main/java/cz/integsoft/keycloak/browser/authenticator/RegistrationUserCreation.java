@@ -9,9 +9,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
-
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
@@ -42,6 +39,9 @@ import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileContext;
 import org.keycloak.userprofile.UserProfileProvider;
 import org.keycloak.userprofile.ValidationException;
+
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Registration user creation flow action.
@@ -107,8 +107,6 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			context.validationError(formData, errors);
 			return;
 		}
-
-		logger.debugf("termsOfUse %s", termsOfUse);
 
 		if (termsOfUse == null || !termsOfUse.equals("on")) {
 			errors.add(new FormMessage(REGISTRATION_FORM_TERMS_OF_USE, "termsOfUseRequired"));
