@@ -37,14 +37,12 @@ import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnection;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cz.integsoft.keycloak.browser.authenticator.exception.QueueException;
 import cz.integsoft.keycloak.browser.authenticator.model.ProfileUpdateEvent;
-import cz.integsoft.keycloak.browser.authenticator.model.QueueConfig;
 import cz.integsoft.keycloak.browser.authenticator.userprofile.EventAuditingAttributeChangeListener;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -64,8 +62,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
 	private static final String REGISTRATION_FORM_NAME_MOBILE_AREA_CODE = "user.attributes.areacode";
 	private static final String REGISTRATION_BAD_MOBILE_FORMAT = "registration.bad.format.phone_number";
-
-	private static Map<String, QueueConfig> queueEnvConfig;
 
 	@Override
 	public InitiatedActionSupport initiatedActionSupport() {
@@ -93,9 +89,6 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 		final UserModel user = context.getUser();
 
-		user.getFirstName();
-		user.getLastName();
-		user.getEmail();
 		final String oldMobileNumber = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);
 		final String oldMobileAreaCode = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE);
 
@@ -151,23 +144,22 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 	 */
 	private void sendMessageToQueue(final ProfileUpdateEvent event) throws QueueException {
 		try {
-			String env = System.getenv("awsEnv");
-			logger.infof("System env %s", env);
-			if (env == null) {
-				env = System.getProperty("awsEnv");
-				logger.infof("System property %s", env);
+			final String awsJmsQueues = System.getProperty("awsJmsQueues");
+			logger.infof("System property awsJmsQueues %s", awsJmsQueues);
+			final String awsRegion = System.getProperty("awsRegion");
+			logger.infof("System property awsRegion %s", awsRegion);
+
+			if (awsJmsQueues == null || awsJmsQueues.isBlank() || awsRegion == null || awsRegion.isBlank()) {
+				logger.error("Queue configuration was not recognized");
+				throw new QueueException("Queue configuration was not recognized");
 			}
 
-			if (queueEnvConfig == null || queueEnvConfig.isEmpty() || queueEnvConfig.get(env) == null) {
-				logger.error("Queue configuration was not recognized by environment");
-				throw new QueueException("Queue configuration was not recognized by environment");
-			}
+			final List<String> queueNames = Arrays.asList(awsJmsQueues.split(","));
 
 			final ObjectMapper mapper = new ObjectMapper();
-			final QueueConfig queueConfig = queueEnvConfig.get(env);
 
 			// Create the connection factory based on the config
-			final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(), AmazonSQSClientBuilder.standard().withRegion(queueConfig.getQueueRegion()));
+			final SQSConnectionFactory connectionFactory = new SQSConnectionFactory(new ProviderConfiguration(), AmazonSQSClientBuilder.standard().withRegion(awsRegion));
 
 			// Create the connection
 			final SQSConnection connection = connectionFactory.createConnection();
@@ -175,10 +167,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			// Create the nontransacted session with AUTO_ACKNOWLEDGE mode
 			final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-			for (final String queueAppName : queueConfig.getQueueAppNames()) {
-				final StringBuffer queueName = new StringBuffer("keycloak-");
-				queueName.append(env).append("-app-user-updates-").append(queueAppName);
-
+			for (final String queueName : queueNames) {
 				logger.infof("Queue name %s", queueName.toString());
 
 				// Create a queue identity and specify the queue name to the session
@@ -230,10 +219,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 	@Override
 	public void init(final Config.Scope config) {
-		queueEnvConfig = new HashMap<>();
-		queueEnvConfig.put("integsoft-sandbox", new QueueConfig(Arrays.asList("t-alerts", "alerts", "alerts-copy"), Regions.US_EAST_2));
-		queueEnvConfig.put("dev", new QueueConfig(Arrays.asList("alerts-concierge-dev-green", "alerts-concierge-dev-blue"), Regions.US_EAST_1));
-		queueEnvConfig.put("prod", new QueueConfig(Arrays.asList("alerts-concierge-prod"), Regions.US_EAST_1));
+
 	}
 
 	@Override
