@@ -126,8 +126,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 			context.success();
 		} catch (final ValidationException pve) {
-			final List<FormMessage> errors = Validation.getFormErrorsFromValidation(pve.getErrors());
-
+			final List<FormMessage> errors = Validation.getFormErrorsFromValidation(pve.getErrors()).stream().filter(e -> !e.getMessage().equals("usernameExistsMessage")).toList();
 			context.challenge(createResponse(context, formData, errors));
 		} catch (final QueueException e) {
 			final List<FormMessage> errors = new ArrayList<>();
