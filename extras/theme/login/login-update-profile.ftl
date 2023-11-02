@@ -64,13 +64,15 @@
 	                    aria-invalid="<#if messagesPerField.existsError('email')>true</#if>" <#if user.email?? && user.email?contains("@mbta.com")>readonly style="border-color: #999; color: #999;"</#if>
 	                />
 	
-	                <#if messagesPerField.existsError('email')>
-	                	<div class="instructions-container">
-		                	<span id="input-error-email" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-		                    	${kcSanitize(messagesPerField.get('email'))?no_esc}
-		                    </span>
-		                </div>
-	                </#if>
+	                <div class="instructions-container">
+		               	<#if messagesPerField.existsError('email')>
+			               	<span id="input-error-email" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
+			                   	${kcSanitize(messagesPerField.get('email'))?no_esc}
+			                </span>
+			            <#else>
+			            	${msg("updateprofile.email.info")}
+			            </#if>
+		              </div>
 	            </div>
 	
 	            <div class="form-group">
