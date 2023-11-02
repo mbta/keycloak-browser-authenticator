@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,14 +21,25 @@ import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
+import org.keycloak.authentication.actiontoken.verifyemail.VerifyEmailActionToken;
+import org.keycloak.common.util.Time;
+import org.keycloak.email.EmailException;
+import org.keycloak.email.EmailTemplateProvider;
+import org.keycloak.events.Details;
+import org.keycloak.events.Errors;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.forms.login.LoginFormsProvider;
+import org.keycloak.models.Constants;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
+import org.keycloak.services.Urls;
 import org.keycloak.services.validation.Validation;
+import org.keycloak.sessions.AuthenticationSessionCompoundId;
+import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileContext;
 import org.keycloak.userprofile.UserProfileProvider;
@@ -46,6 +58,9 @@ import cz.integsoft.keycloak.browser.authenticator.model.ProfileUpdateEvent;
 import cz.integsoft.keycloak.browser.authenticator.userprofile.EventAuditingAttributeChangeListener;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilderException;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Update profile required action rewrite.
@@ -120,6 +135,16 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 				updatedUserData.put(USER_ATTRIBUTE_PHONE_NAME, mobileAreaCode + mobileNumber);
 			}
 
+			if (updatedUserData.containsKey(UserModel.EMAIL)) {
+				user.setEmailVerified(false);
+				user.addRequiredAction(UserModel.RequiredAction.VERIFY_EMAIL);
+				final AuthenticationSessionModel authSession = context.getAuthenticationSession();
+				final String email = updatedUserData.get(UserModel.EMAIL);
+				authSession.setAuthNote(Constants.VERIFY_EMAIL_KEY, email);
+				final EventBuilder eventEmail = context.getEvent().clone().event(EventType.SEND_VERIFY_EMAIL).detail(Details.EMAIL, email);
+				sendVerifyEmail(context.getSession(), user, context.getAuthenticationSession(), eventEmail);
+			}
+
 			if (!updatedUserData.isEmpty()) {
 				sendMessageToQueue(new ProfileUpdateEvent(user.getFirstAttribute("mbta_uuid"), updatedUserData));
 			}
@@ -132,6 +157,38 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			final List<FormMessage> errors = new ArrayList<>();
 			errors.add(new FormMessage(null, "registration.queue.error"));
 			context.challenge(createResponse(context, formData, errors));
+		}
+	}
+
+	/**
+	 * Send verify email.
+	 *
+	 * @param session {@link KeycloakSession}
+	 * @param user {@link UserModel}
+	 * @param authSession {@link AuthenticationSessionModel}
+	 * @param event {@link EventBuilder}
+	 * @throws UriBuilderException error catched
+	 * @throws IllegalArgumentException error catched
+	 */
+	private void sendVerifyEmail(final KeycloakSession session, final UserModel user, final AuthenticationSessionModel authSession, final EventBuilder event) throws UriBuilderException, IllegalArgumentException {
+		final RealmModel realm = session.getContext().getRealm();
+		final UriInfo uriInfo = session.getContext().getUri();
+
+		final int validityInSecs = realm.getActionTokenGeneratedByUserLifespan(VerifyEmailActionToken.TOKEN_TYPE);
+		final int absoluteExpirationInSecs = Time.currentTime() + validityInSecs;
+
+		final String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
+		final VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
+		final UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo), authSession.getClient().getClientId(), authSession.getTabId());
+		final String link = builder.build(realm.getName()).toString();
+		final long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
+
+		try {
+			session.getProvider(EmailTemplateProvider.class).setAuthenticationSession(authSession).setRealm(realm).setUser(user).sendVerifyEmail(link, expirationInMinutes);
+			event.success();
+		} catch (final EmailException e) {
+			logger.error("Failed to send verification email", e);
+			event.error(Errors.EMAIL_SEND_FAILED);
 		}
 	}
 

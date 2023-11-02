@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>cz.integsoft.keycloak.browser</groupId>
   <artifactId>mbta-keycloak-browser-authenticator</artifactId>
-  <version>1.1.2</version>
+  <version>1.2.0</version>
   <name>MBTA Keycloak Browser Authenticator</name>
   <description>Keycloak SSO authenticator for MBTA</description>
   
