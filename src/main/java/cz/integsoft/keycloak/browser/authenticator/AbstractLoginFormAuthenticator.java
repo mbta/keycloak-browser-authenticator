@@ -32,6 +32,17 @@ public abstract class AbstractLoginFormAuthenticator extends AbstractFormAuthent
 	}
 
 	/**
+	 * Expired code error response.
+	 *
+	 * @param context authentication flow context
+	 * @return {@link Response}
+	 */
+	protected Response emailCodeExpired(final AuthenticationFlowContext context) {
+		context.fork();
+		return context.form().setError("secondFactor.codeExpired").createForm(FORM_FTL_EMAIL_CODE);
+	}
+
+	/**
 	 * Invalid user error response.
 	 *
 	 * @param context authentication flow context
