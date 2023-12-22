@@ -11,10 +11,13 @@ import java.util.regex.Pattern;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
+import org.keycloak.authentication.AuthenticationFlowError;
+import org.keycloak.authentication.AuthenticationFlowException;
 import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
+import org.keycloak.authentication.forms.RegistrationPage;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -40,6 +43,7 @@ import org.keycloak.userprofile.UserProfileContext;
 import org.keycloak.userprofile.UserProfileProvider;
 import org.keycloak.userprofile.ValidationException;
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriBuilder;
 
@@ -77,9 +81,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		trimPhone(formData);
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
-		final KeycloakSession session = context.getSession();
-		final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
-		final UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION_USER_CREATION, formData);
+		final UserProfile profile = getOrCreateUserProfile(context, formData);
 		final String email = profile.getAttributes().getFirstValue(UserModel.EMAIL);
 
 		final String username = profile.getAttributes().getFirstValue(UserModel.USERNAME);
@@ -189,16 +191,19 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 	@Override
 	public void buildPage(final FormContext context, final LoginFormsProvider form) {
-
+		checkNotOtherUserAuthenticating(context);
 	}
 
 	@Override
 	public void success(final FormContext context) {
+		checkNotOtherUserAuthenticating(context);
+
 		final MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-		trimPhone(formData);
 
 		final String email = formData.getFirst(UserModel.EMAIL);
 		String username = formData.getFirst(UserModel.USERNAME);
+
+		trimPhone(formData);
 
 		if (context.getRealm().isRegistrationEmailAsUsername()) {
 			username = email;
@@ -206,14 +211,11 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 		context.getEvent().detail(Details.USERNAME, username).detail(Details.REGISTER_METHOD, "form").detail(Details.EMAIL, email);
 
-		final KeycloakSession session = context.getSession();
-
 		final String uuid = UUID.randomUUID().toString();
 
 		formData.add("user.attributes.mbta_uuid", uuid);
 
-		final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
-		final UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION_USER_CREATION, formData);
+		final UserProfile profile = getOrCreateUserProfile(context, formData);
 		final UserModel user = profile.create();
 
 		user.setEnabled(true);
@@ -262,7 +264,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 	@Override
 	public String getDisplayType() {
-		return "MBTA Registration User Creation";
+		return "MBTA Registration User Profile Creation";
 	}
 
 	@Override
@@ -300,5 +302,36 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	@Override
 	public String getId() {
 		return PROVIDER_ID;
+	}
+
+	private void checkNotOtherUserAuthenticating(final FormContext context) {
+		if (context.getUser() != null) {
+			// the user probably did some back navigation in the browser, hitting this page in a strange state
+			context.getEvent().detail(Details.EXISTING_USER, context.getUser().getUsername());
+			throw new AuthenticationFlowException(AuthenticationFlowError.GENERIC_AUTHENTICATION_ERROR, Errors.DIFFERENT_USER_AUTHENTICATING, Messages.EXPIRED_ACTION);
+		}
+	}
+
+	private MultivaluedMap<String, String> normalizeFormParameters(final MultivaluedMap<String, String> formParams) {
+		final MultivaluedHashMap<String, String> copy = new MultivaluedHashMap<>(formParams);
+
+		// Remove "password" and "password-confirm" to avoid leaking them in the user-profile data
+		copy.remove(RegistrationPage.FIELD_PASSWORD);
+		copy.remove(RegistrationPage.FIELD_PASSWORD_CONFIRM);
+
+		return copy;
+	}
+
+	/**
+	 * Get user profile instance for current HTTP request (KeycloakSession) and for given context. This assumes that there is single user registered within HTTP request, which is always the case in Keycloak
+	 */
+	public UserProfile getOrCreateUserProfile(final FormContext formContext, MultivaluedMap<String, String> formData) {
+		final KeycloakSession session = formContext.getSession();
+		// we make changes in the parameters, so we always create new profile
+		formData = normalizeFormParameters(formData);
+		final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
+		final UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION, formData);
+		session.setAttribute("UP_REGISTER", profile);
+		return profile;
 	}
 }
