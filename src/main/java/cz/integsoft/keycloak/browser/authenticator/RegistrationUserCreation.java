@@ -97,7 +97,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			context.getEvent().detail(Details.USERNAME, email);
 		}
 
-		List<FormMessage> errors = new ArrayList<>();
+		final List<FormMessage> errors = new ArrayList<>();
 		final String token = formData.getFirst("token");
 		final String robot = formData.getFirst("robot");
 		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
@@ -137,7 +137,10 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		try {
 			profile.validate();
 		} catch (final ValidationException pve) {
-			errors = Validation.getFormErrorsFromValidation(pve.getErrors());
+			final List<FormMessage> errs = Validation.getFormErrorsFromValidation(pve.getErrors());
+			if (errs != null) {
+				errors.addAll(errs);
+			}
 
 			if (pve.hasError(Messages.EMAIL_EXISTS)) {
 				context.error(Errors.EMAIL_IN_USE);
@@ -147,7 +150,7 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 				context.error(Errors.USERNAME_IN_USE);
 			}
 			if (context.getRealm().isRegistrationEmailAsUsername() && errors.stream().anyMatch(e -> e.getField().equalsIgnoreCase("username"))) {
-				errors.remove(errors.stream().filter(e -> e.getField().equalsIgnoreCase("username")).findFirst().get());
+				errors.removeIf(e -> e != null && e.getField().equalsIgnoreCase("username"));
 			}
 			context.validationError(formData, errors);
 			return;
