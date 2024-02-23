@@ -234,10 +234,10 @@ public class EmailCodeAuthenticator extends AbstractLoginFormAuthenticator imple
 			context.getEvent().error(Errors.EXPIRED_CODE);
 			final Response challenge = emailCodeExpired(context);
 			context.failureChallenge(AuthenticationFlowError.EXPIRED_CODE, challenge);
-		} else {
-			// valid
-			context.getAuthenticationSession().removeAuthNote(EmailCodeAuthenticatorFactory.CODE);
+			return;
 		}
+		// valid
+		context.getAuthenticationSession().removeAuthNote(EmailCodeAuthenticatorFactory.CODE);
 		if (context.getUser().getFirstAttribute(SKIP_MFA_ATTR) == null || !context.getUser().getFirstAttribute(SKIP_MFA_ATTR).equals("true")) {
 			context.getUser().removeAttribute(NUMBER_OF_LOGIN_ATTR);
 		}
