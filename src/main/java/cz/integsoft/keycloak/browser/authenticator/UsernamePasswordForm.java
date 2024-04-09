@@ -7,7 +7,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -31,6 +30,7 @@ import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 
@@ -183,17 +183,25 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
 
 	@Override
 	public void authenticate(final AuthenticationFlowContext context) {
-		final MultivaluedMap<String, String> formData = new MultivaluedMapImpl<>();
+		final MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
 		final String loginHint = context.getAuthenticationSession().getClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM);
 
-		final String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getRealm(), context.getHttpRequest().getHttpHeaders());
+		final String rememberMeUsername = AuthenticationManager.getRememberMeUsername(context.getSession());
 
-		if (loginHint != null || rememberMeUsername != null) {
-			if (loginHint != null) {
-				formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
-			} else {
-				formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
-				formData.add("rememberMe", "on");
+		if (context.getUser() != null) {
+			final LoginFormsProvider form = context.form();
+			form.setAttribute(LoginFormsProvider.USERNAME_HIDDEN, true);
+			form.setAttribute(LoginFormsProvider.REGISTRATION_DISABLED, true);
+			context.getAuthenticationSession().setAuthNote(USER_SET_BEFORE_USERNAME_PASSWORD_AUTH, "true");
+		} else {
+			context.getAuthenticationSession().removeAuthNote(USER_SET_BEFORE_USERNAME_PASSWORD_AUTH);
+			if (loginHint != null || rememberMeUsername != null) {
+				if (loginHint != null) {
+					formData.add(AuthenticationManager.FORM_USERNAME, loginHint);
+				} else {
+					formData.add(AuthenticationManager.FORM_USERNAME, rememberMeUsername);
+					formData.add("rememberMe", "on");
+				}
 			}
 		}
 		final Response challengeResponse = challenge(context, formData);
