@@ -15,6 +15,7 @@ import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.light.LightweightUserAdapter;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 
@@ -53,12 +54,21 @@ public class IdpCreateUserIfUniqueAuthenticator extends org.keycloak.authenticat
 			return;
 		}
 
-		final ExistingUserInfo duplication = checkExistingUser(context, username, serializedCtx, brokerContext);
+		final ExistingUserInfo duplication = brokerContext.getIdpConfig().isTransientUsers() ? null : checkExistingUser(context, username, serializedCtx, brokerContext);
 
-		if (duplication == null) {
+		UserModel federatedUser = null;
+		if (brokerContext.getIdpConfig().isTransientUsers()) {
+			logger.debugf("Transient brokering requested. Recording user details for account '%s' and from identity provider '%s' .", username, brokerContext.getIdpConfig().getAlias());
+
+			federatedUser = new LightweightUserAdapter(session, context.getAuthenticationSession().getParentSession().getId());
+			federatedUser.setUsername(username);
+		} else if (duplication == null) {
 			logger.debugf("No duplication detected. Creating account for user '%s' and linking with identity provider '%s' .", username, brokerContext.getIdpConfig().getAlias());
 
-			final UserModel federatedUser = session.users().addUser(realm, username);
+			federatedUser = session.users().addUser(realm, username);
+		}
+
+		if (federatedUser != null) {
 			federatedUser.setEnabled(true);
 
 			final String uuid = UUID.randomUUID().toString();

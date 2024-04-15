@@ -18,6 +18,7 @@ import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
 import org.keycloak.authentication.forms.RegistrationPage;
+import org.keycloak.authentication.requiredactions.TermsAndConditions;
 import org.keycloak.common.util.Time;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -29,6 +30,7 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.RequiredActionProviderModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -65,6 +67,8 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	private static final String REGISTRATION_FORM_NAME_MOBILE_PHONE = "user.attributes.phone_number";
 	private static final String REGISTRATION_FORM_TERMS_OF_USE = "terms_of_use";
 
+	protected static final String FIELD = "termsAccepted";
+
 	@Override
 	public String getHelpText() {
 		return "This action must always be first! Validates the username of the user in validation phase.  In success phase, this will create the user in the database.";
@@ -82,11 +86,11 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
 		final UserProfile profile = getOrCreateUserProfile(context, formData);
-		final String email = profile.getAttributes().getFirstValue(UserModel.EMAIL);
+		final String email = profile.getAttributes().getFirst(UserModel.EMAIL);
 
-		final String username = profile.getAttributes().getFirstValue(UserModel.USERNAME);
-		final String firstName = profile.getAttributes().getFirstValue(UserModel.FIRST_NAME);
-		final String lastName = profile.getAttributes().getFirstValue(UserModel.LAST_NAME);
+		final String username = profile.getAttributes().getFirst(UserModel.USERNAME);
+		final String firstName = profile.getAttributes().getFirst(UserModel.FIRST_NAME);
+		final String lastName = profile.getAttributes().getFirst(UserModel.LAST_NAME);
 
 		context.getEvent().detail(Details.EMAIL, email);
 		context.getEvent().detail(Details.USERNAME, username);
@@ -223,6 +227,16 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 		user.setEnabled(true);
 
+		if ("on".equals(formData.getFirst(FIELD))) {
+			// if accepted terms and conditions checkbox, remove action and add the attribute if enabled
+			final RequiredActionProviderModel tacModel = context.getRealm().getRequiredActionProviderByAlias(UserModel.RequiredAction.TERMS_AND_CONDITIONS.name());
+			if (tacModel != null && tacModel.isEnabled()) {
+				user.setSingleAttribute(TermsAndConditions.USER_ATTRIBUTE, Integer.toString(Time.currentTime()));
+				context.getAuthenticationSession().removeRequiredAction(UserModel.RequiredAction.TERMS_AND_CONDITIONS);
+				user.removeRequiredAction(UserModel.RequiredAction.TERMS_AND_CONDITIONS);
+			}
+		}
+
 		logger.infof("Added uuid %s to user %s", uuid, user.getUsername());
 
 		context.setUser(user);
@@ -330,11 +344,13 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 	 */
 	public UserProfile getOrCreateUserProfile(final FormContext formContext, MultivaluedMap<String, String> formData) {
 		final KeycloakSession session = formContext.getSession();
-		// we make changes in the parameters, so we always create new profile
-		formData = normalizeFormParameters(formData);
-		final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
-		final UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION, formData);
-		session.setAttribute("UP_REGISTER", profile);
+		UserProfile profile = (UserProfile) session.getAttribute("UP_REGISTER");
+		if (profile == null) {
+			formData = normalizeFormParameters(formData);
+			final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
+			profile = profileProvider.create(UserProfileContext.REGISTRATION, formData);
+			session.setAttribute("UP_REGISTER", profile);
+		}
 		return profile;
 	}
 }
