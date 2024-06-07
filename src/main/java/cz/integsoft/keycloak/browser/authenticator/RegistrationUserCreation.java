@@ -40,6 +40,7 @@ import org.keycloak.services.managers.ClientSessionCode;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.resources.LoginActionsService;
 import org.keycloak.services.validation.Validation;
+import org.keycloak.userprofile.Attributes;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileContext;
 import org.keycloak.userprofile.UserProfileProvider;
@@ -86,11 +87,12 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
 		final UserProfile profile = getOrCreateUserProfile(context, formData);
-		final String email = profile.getAttributes().getFirst(UserModel.EMAIL);
+		final Attributes attributes = profile.getAttributes();
 
-		final String username = profile.getAttributes().getFirst(UserModel.USERNAME);
-		final String firstName = profile.getAttributes().getFirst(UserModel.FIRST_NAME);
-		final String lastName = profile.getAttributes().getFirst(UserModel.LAST_NAME);
+		final String email = attributes.getFirst(UserModel.EMAIL);
+		final String username = attributes.getFirst(UserModel.USERNAME);
+		final String firstName = attributes.getFirst(UserModel.FIRST_NAME);
+		final String lastName = attributes.getFirst(UserModel.LAST_NAME);
 
 		context.getEvent().detail(Details.EMAIL, email);
 		context.getEvent().detail(Details.USERNAME, username);
@@ -146,6 +148,10 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 				errors.addAll(errs);
 			}
 
+			if (pve.hasError(Messages.EMAIL_EXISTS, Messages.INVALID_EMAIL)) {
+				context.getEvent().detail(Details.EMAIL, attributes.getFirst(UserModel.EMAIL));
+			}
+
 			if (pve.hasError(Messages.EMAIL_EXISTS)) {
 				context.error(Errors.EMAIL_IN_USE);
 			} else if (pve.hasError(Messages.MISSING_EMAIL, Messages.MISSING_USERNAME, Messages.INVALID_EMAIL)) {
@@ -155,6 +161,14 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			}
 			if (context.getRealm().isRegistrationEmailAsUsername() && errors.stream().anyMatch(e -> e.getField().equalsIgnoreCase("username"))) {
 				errors.removeIf(e -> e != null && e.getField().equalsIgnoreCase("username"));
+			}
+			if (context.getRealm().isRegistrationEmailAsUsername() && errors.stream().anyMatch(e -> e.getField().equalsIgnoreCase("firstName"))) {
+				errors.removeIf(e -> e != null && e.getField().equalsIgnoreCase("firstName"));
+				errors.add(new FormMessage("firstName", "missingFirstNameMessage"));
+			}
+			if (context.getRealm().isRegistrationEmailAsUsername() && errors.stream().anyMatch(e -> e.getField().equalsIgnoreCase("lastName"))) {
+				errors.removeIf(e -> e != null && e.getField().equalsIgnoreCase("lastName"));
+				errors.add(new FormMessage("lastName", "missingLastNameMessage"));
 			}
 			context.validationError(formData, errors);
 			return;
