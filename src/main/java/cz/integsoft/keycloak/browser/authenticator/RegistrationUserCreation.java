@@ -86,6 +86,24 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		trimPhone(formData);
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 
+		final List<FormMessage> errors = new ArrayList<>();
+		final String token = formData.getFirst("token");
+		final String robot = formData.getFirst("robot");
+		final String termsOfUse = formData.getFirst(REGISTRATION_FORM_TERMS_OF_USE);
+
+		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
+			errors.add(new FormMessage(null, "login.error.robot"));
+			context.validationError(formData, errors);
+			return;
+		}
+
+		if (termsOfUse == null || !termsOfUse.equals("on")) {
+			errors.add(new FormMessage(REGISTRATION_FORM_TERMS_OF_USE, "termsOfUseRequired"));
+		}
+
+		formData.remove(REGISTRATION_FORM_TERMS_OF_USE);
+		formData.remove("token");
+
 		final UserProfile profile = getOrCreateUserProfile(context, formData);
 		final Attributes attributes = profile.getAttributes();
 
@@ -103,22 +121,8 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 			context.getEvent().detail(Details.USERNAME, email);
 		}
 
-		final List<FormMessage> errors = new ArrayList<>();
-		final String token = formData.getFirst("token");
-		final String robot = formData.getFirst("robot");
 		final String mobileAreaCode = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_AREA_CODE);
 		final String mobileNumber = formData.getFirst(REGISTRATION_FORM_NAME_MOBILE_PHONE);
-		final String termsOfUse = formData.getFirst(REGISTRATION_FORM_TERMS_OF_USE);
-
-		if ((token != null && !token.equals(String.valueOf(LocalDate.now().getYear())) || robot != null)) {
-			errors.add(new FormMessage(null, "login.error.robot"));
-			context.validationError(formData, errors);
-			return;
-		}
-
-		if (termsOfUse == null || !termsOfUse.equals("on")) {
-			errors.add(new FormMessage(REGISTRATION_FORM_TERMS_OF_USE, "termsOfUseRequired"));
-		}
 
 		if (email != null && email.toLowerCase(Locale.US).contains(EMAIL_MBTA_DOMAIN)) {
 			final IdentityProviderModel idpm = getFirstIdentityProvider(context);
@@ -232,10 +236,6 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 
 		context.getEvent().detail(Details.USERNAME, username).detail(Details.REGISTER_METHOD, "form").detail(Details.EMAIL, email);
 
-		final String uuid = UUID.randomUUID().toString();
-
-		formData.add("user.attributes.mbta_uuid", uuid);
-
 		final UserProfile profile = getOrCreateUserProfile(context, formData);
 		final UserModel user = profile.create();
 
@@ -250,8 +250,6 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 				user.removeRequiredAction(UserModel.RequiredAction.TERMS_AND_CONDITIONS);
 			}
 		}
-
-		logger.infof("Added uuid %s to user %s", uuid, user.getUsername());
 
 		context.setUser(user);
 
@@ -360,6 +358,9 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		final KeycloakSession session = formContext.getSession();
 		UserProfile profile = (UserProfile) session.getAttribute("UP_REGISTER");
 		if (profile == null) {
+			final String uuid = UUID.randomUUID().toString();
+			formData.add("user.attributes.mbta_uuid", uuid);
+			logger.infof("Creating new user, added uuid %s", uuid);
 			formData = normalizeFormParameters(formData);
 			final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
 			profile = profileProvider.create(UserProfileContext.REGISTRATION, formData);
