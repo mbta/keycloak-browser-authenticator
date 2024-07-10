@@ -10,6 +10,8 @@ import java.util.Map;
  */
 public class ProfileUpdateEvent {
 
+	private String id;
+
 	private String mbtaUuid;
 
 	private Map<String, String> updates;
@@ -27,11 +29,13 @@ public class ProfileUpdateEvent {
 	 *
 	 * @param mbtaUuid uuid
 	 * @param updates profile updates
+	 * @param id keycloak id
 	 */
-	public ProfileUpdateEvent(final String mbtaUuid, final Map<String, String> updates) {
+	public ProfileUpdateEvent(final String mbtaUuid, final Map<String, String> updates, final String id) {
 		super();
 		this.mbtaUuid = mbtaUuid;
 		this.updates = updates;
+		this.id = id;
 	}
 
 	/**
@@ -60,6 +64,20 @@ public class ProfileUpdateEvent {
 	 */
 	public final void setUpdates(final Map<String, String> updates) {
 		this.updates = updates;
+	}
+
+	/**
+	 * @return the id
+	 */
+	public final String getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public final void setId(final String id) {
+		this.id = id;
 	}
 
 }
