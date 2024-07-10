@@ -146,7 +146,7 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 			}
 
 			if (!updatedUserData.isEmpty()) {
-				sendMessageToQueue(new ProfileUpdateEvent(user.getFirstAttribute("mbta_uuid"), updatedUserData));
+				sendMessageToQueue(new ProfileUpdateEvent(user.getFirstAttribute("mbta_uuid"), updatedUserData, user.getId()));
 			}
 
 			context.success();
