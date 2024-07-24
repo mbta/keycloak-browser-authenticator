@@ -34,12 +34,6 @@ public class IdpPostLoginAuthenticator implements Authenticator {
 			return;
 		}
 
-		if (user.getFirstAttribute("mbta_uuid") == null) {
-			final String uuid = UUID.randomUUID().toString();
-			user.setSingleAttribute("mbta_uuid", uuid);
-			logger.infof("Added uuid %s to user %s", uuid, user.getUsername());
-		}
-
 		if (user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) != null && user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME) != null) {
 			final String phoneComp = user.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) + user.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);
 			user.setSingleAttribute(USER_ATTRIBUTE_PHONE_COMP_NAME, phoneComp);
