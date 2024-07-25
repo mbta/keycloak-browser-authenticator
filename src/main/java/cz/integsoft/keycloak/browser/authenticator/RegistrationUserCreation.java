@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -358,9 +357,6 @@ public class RegistrationUserCreation implements FormAction, FormActionFactory {
 		final KeycloakSession session = formContext.getSession();
 		UserProfile profile = (UserProfile) session.getAttribute("UP_REGISTER");
 		if (profile == null) {
-			final String uuid = UUID.randomUUID().toString();
-			formData.add("user.attributes.mbta_uuid", uuid);
-			logger.infof("Creating new user, added uuid %s", uuid);
 			formData = normalizeFormParameters(formData);
 			final UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
 			profile = profileProvider.create(UserProfileContext.REGISTRATION, formData);

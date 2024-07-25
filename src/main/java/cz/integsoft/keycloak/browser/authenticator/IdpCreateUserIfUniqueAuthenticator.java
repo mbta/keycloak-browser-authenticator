@@ -2,7 +2,6 @@ package cz.integsoft.keycloak.browser.authenticator;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -70,10 +69,6 @@ public class IdpCreateUserIfUniqueAuthenticator extends org.keycloak.authenticat
 
 		if (federatedUser != null) {
 			federatedUser.setEnabled(true);
-
-			final String uuid = UUID.randomUUID().toString();
-			federatedUser.setSingleAttribute("mbta_uuid", uuid);
-			logger.infof("Added uuid %s to user %s", uuid, federatedUser.getUsername());
 
 			if (federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) != null && federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME) != null) {
 				final String phoneComp = federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_AREA_CODE) + federatedUser.getFirstAttribute(USER_ATTRIBUTE_PHONE_NAME);

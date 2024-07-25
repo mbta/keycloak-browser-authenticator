@@ -4,7 +4,6 @@ import static org.keycloak.services.validation.Validation.FIELD_PASSWORD;
 import static org.keycloak.services.validation.Validation.FIELD_USERNAME;
 
 import java.util.Locale;
-import java.util.UUID;
 
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -64,12 +63,6 @@ public class UsernamePasswordForm extends AbstractUsernameFormAuthenticator impl
 		}
 		if (!validatePassword(context, formData)) {
 			return;
-		}
-		// check existence of mbta_uuid
-		if (context.getUser() != null && context.getUser().getFirstAttribute("mbta_uuid") == null) {
-			final String uuid = UUID.randomUUID().toString();
-			context.getUser().setSingleAttribute("mbta_uuid", uuid);
-			logger.infof("Added uuid %s to user %s", uuid, context.getUser().getUsername());
 		}
 		context.success();
 	}

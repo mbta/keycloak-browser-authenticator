@@ -65,12 +65,12 @@ public class IdpPostLoginAuthenticatorFactory implements AuthenticatorFactory {
 
 	@Override
 	public String getDisplayType() {
-		return "MBTA Create UUID If Not Exists";
+		return "MBTA create phone_comp";
 	}
 
 	@Override
 	public String getHelpText() {
-		return "Detect if there is existing mbta_uuid in Keycloak account. If no, create it";
+		return "Combine phone area code and number into a single attribute.";
 	}
 
 	@Override
