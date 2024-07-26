@@ -17,6 +17,7 @@ import javax.jms.TextMessage;
 
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
+import org.keycloak.authentication.AuthenticationProcessor;
 import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionFactory;
@@ -179,7 +180,8 @@ public class UpdateProfile implements RequiredActionProvider, RequiredActionFact
 
 		final String authSessionEncodedId = AuthenticationSessionCompoundId.fromAuthSession(authSession).getEncodedId();
 		final VerifyEmailActionToken token = new VerifyEmailActionToken(user.getId(), absoluteExpirationInSecs, authSessionEncodedId, user.getEmail(), authSession.getClient().getClientId());
-		final UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo), authSession.getClient().getClientId(), authSession.getTabId());
+		final UriBuilder builder = Urls.actionTokenBuilder(uriInfo.getBaseUri(), token.serialize(session, realm, uriInfo), authSession.getClient().getClientId(), authSession.getTabId(),
+				AuthenticationProcessor.getClientData(session, authSession));
 		final String link = builder.build(realm.getName()).toString();
 		final long expirationInMinutes = TimeUnit.SECONDS.toMinutes(validityInSecs);
 
