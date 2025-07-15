@@ -20,6 +20,9 @@ import org.keycloak.services.messages.Messages;
 
 import jakarta.ws.rs.core.Response;
 
+import static org.keycloak.broker.provider.AbstractIdentityProvider.BROKER_REGISTERED_NEW_USER;
+
+
 /**
  * IDP create user authenticator.
  *
